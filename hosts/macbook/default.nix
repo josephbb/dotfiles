@@ -41,6 +41,7 @@
       "zoom"
       "signal"
       "tidal"
+      "obsidian"
     ];
   };
 
@@ -61,6 +62,7 @@
         "/Applications/Firefox.app"
         "/Applications/Ghostty.app"
         "/Applications/Visual Studio Code.app"
+        "/Applications/Obsidian.app"
         "/System/Applications/Messages.app"
         "/Applications/Signal.app"
         "/Applications/zoom.us.app"
