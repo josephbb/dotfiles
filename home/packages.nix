@@ -33,6 +33,9 @@
     pandoc
     R
 
+    # LaTeX (large first download; latexmk + full CTAN for papers/ArXiv)
+    texlive.combined.scheme-full
+
     # Nix ergonomics
     nixfmt-rfc-style
     nil

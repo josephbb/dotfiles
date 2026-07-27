@@ -37,6 +37,18 @@ in
           # Git / docs
           github.vscode-pull-request-github
           yzhang.markdown-all-in-one
+
+          # LaTeX (papers: ArXiV.tex, latexmk, bib)
+          james-yu.latex-workshop
+
+          # Astro blog (josephbb.github.io): Astro + MDX + Prettier
+          astro-build.astro-vscode
+          unifiedjs.vscode-mdx
+          esbenp.prettier-vscode
+
+          # Prose / papers
+          streetsidesoftware.code-spell-checker
+          valentjn.vscode-ltex
         ])
         ++ [ everforest ];
 
@@ -73,15 +85,6 @@ in
           "**/Datasets/**" = true;
         };
 
-        "[python]" = {
-          "editor.defaultFormatter" = "charliermarsh.ruff";
-          "editor.formatOnSave" = true;
-          "editor.codeActionsOnSave" = {
-            "source.fixAll.ruff" = "explicit";
-            "source.organizeImports.ruff" = "explicit";
-          };
-        };
-
         # Prefer project .venv / uv env when present; don't hardcode a global interpreter
         "python.analysis.typeCheckingMode" = "standard";
         "python.terminal.activateEnvironment" = true;
@@ -94,6 +97,48 @@ in
         "direnv.restart.automatic" = true;
         "nix.enableLanguageServer" = true;
         "nix.serverPath" = "nil";
+
+        # LaTeX Workshop → latexmk (matches your paper repos)
+        "latex-workshop.latex.tools" = [
+          {
+            name = "latexmk";
+            command = "latexmk";
+            args = [
+              "-pdf"
+              "-interaction=nonstopmode"
+              "-synctex=1"
+              "-file-line-error"
+              "%DOC%"
+            ];
+          }
+        ];
+        "latex-workshop.latex.recipes" = [
+          {
+            name = "latexmk";
+            tools = [ "latexmk" ];
+          }
+        ];
+        "latex-workshop.view.pdf.viewer" = "tab";
+
+        # Prettier for the Astro blog (and MD/MDX); Ruff stays for Python
+        "editor.defaultFormatter" = "esbenp.prettier-vscode";
+        "[astro]" = {
+          "editor.defaultFormatter" = "esbenp.prettier-vscode";
+        };
+        "[markdown]" = {
+          "editor.defaultFormatter" = "esbenp.prettier-vscode";
+        };
+        "[mdx]" = {
+          "editor.defaultFormatter" = "esbenp.prettier-vscode";
+        };
+        "[python]" = {
+          "editor.defaultFormatter" = "charliermarsh.ruff";
+          "editor.formatOnSave" = true;
+          "editor.codeActionsOnSave" = {
+            "source.fixAll.ruff" = "explicit";
+            "source.organizeImports.ruff" = "explicit";
+          };
+        };
 
         "workbench.startupEditor" = "none";
         "explorer.confirmDelete" = false;
