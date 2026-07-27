@@ -21,6 +21,7 @@
     glow
     tldr
     shellcheck
+    sl
 
     # Python / reproducibility
     uv
