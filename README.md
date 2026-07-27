@@ -13,12 +13,28 @@ Or use the shell alias after the first successful switch: `rebuild`.
 ## Layout
 
 ```text
-flake.nix              # inputs + darwinConfigurations.macbook
+flake.nix              # inputs + darwinConfigurations.macbook + templates
 hosts/macbook/         # nix-darwin: Homebrew casks, fonts, macOS defaults
-home/                  # home-manager: CLI packages, zsh, starship, git
+home/                  # home-manager: CLI packages, zsh, starship, git, vscode
 keychron/              # exported keyboard profiles (backup only)
-templates/project/     # research repo starter (flake + uv) — TBD
+templates/python/      # nix flake new -t ~/dotfiles#python …
 ```
+
+## New research project
+
+```bash
+nix flake new -t ~/dotfiles#python ~/Projects/my-analysis
+cd ~/Projects/my-analysis
+direnv allow    # or: nix develop
+uv sync
+./scripts/install_kernel.sh
+```
+
+Barebones layout: `data/`, `output/`, `src/`, `analysis.ipynb`, nix+uv (numpy/scipy/pandas/polars/pymc/arviz/…). See [`templates/python`](templates/python).
+
+## LaTeX
+
+`texlive.combined.scheme-full` is in home-manager (provides `latexmk`, pdflatex, bibtex, etc.). Pair with the LaTeX Workshop VS Code extension. First rebuild downloads a lot; later switches are incremental.
 
 ## Fresh Mac
 

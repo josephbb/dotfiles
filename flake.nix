@@ -41,6 +41,15 @@
         ];
       };
 
+      # Project starters: nix flake new -t ~/dotfiles#python ~/Projects/my-analysis
+      templates = {
+        python = {
+          path = ./templates/python;
+          description = "Barebones Python analysis (nix + uv + PyMC/pandas/polars)";
+        };
+        default = self.templates.python;
+      };
+
       # Convenience: nix fmt
       formatter.${system} = nixpkgs.legacyPackages.${system}.nixfmt-rfc-style;
     };
