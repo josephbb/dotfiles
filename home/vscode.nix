@@ -62,7 +62,7 @@ in
         "everforest.darkItalic" = true;
         "everforest.lightItalic" = true;
 
-        "editor.fontFamily" = "JetBrainsMono Nerd Font, Menlo, Monaco, 'Courier New', monospace";
+        "editor.fontFamily" = "IosevkaTerm Nerd Font, Menlo, Monaco, 'Courier New', monospace";
         "editor.fontSize" = 13;
         "editor.fontLigatures" = true;
         "editor.formatOnSave" = true;

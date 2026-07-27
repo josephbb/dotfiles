@@ -46,13 +46,13 @@
 
   # Fonts available system-wide for Ghostty / editors.
   fonts.packages = with pkgs; [
-    nerd-fonts.jetbrains-mono
+    nerd-fonts.iosevka-term
   ];
 
   # Sensible macOS defaults (light touch; expand later).
   system.defaults = {
     dock = {
-      autohide = true;
+      autohide = false;
       tilesize = 42; # default is 64; lower = smaller icons
       orientation = "bottom"; # change to "left" or "right" later if desired
       show-recents = false;

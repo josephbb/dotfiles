@@ -1,6 +1,23 @@
 # dotfiles
 
-Declarative macOS setup for Joseph's machine via **nix-darwin** + **home-manager**.
+Declarative macOS setup for Joe’s machine via **nix-darwin** + **home-manager**.
+
+## Why this setup
+
+A single private repo is the source of truth for the machine. Edit config → `rebuild` → the laptop matches. That buys:
+
+- **New Mac in an afternoon** — Install Determinate Nix, clone this repo, `darwin-rebuild switch`. CLI tools, shell, fonts, Dock, VS Code extensions, and app installs come back without a checklist of downloads.
+- **Reproducible, not “snowflake”** — Versions are pinned in `flake.lock`. The same flake on another machine (or after a wipe) yields the same environment, instead of drifting Homebrew installs and forgotten prefs.
+- **Clear split of concerns**
+  - **nix-darwin** — system-ish: Homebrew casks, fonts, Dock/Finder defaults, folder layout
+  - **home-manager** — your user env: packages on `PATH`, zsh/Starship, git, Ghostty config, VS Code settings/extensions
+  - **Project flakes + uv** — per-repo science stacks (PyMC, etc.), not one giant global Python
+- **Research-shaped defaults** — `~/Projects` for git, `~/Datasets` for bulky/scratch data (not in Drive sync), LaTeX via TeX Live, Jupyter kernels from project templates, no conda.
+- **Editor ready for the real work** — VS Code ships with Python/Ruff/Jupyter, LaTeX Workshop, Astro/MDX/Prettier (blog), Nix/direnv — themes track macOS light/dark.
+- **Portable identity, local secrets** — `gh`/git/SSH tooling is declared here; logins, Proton/Apple accounts, and API keys stay out of the flake (as they should).
+- **Templates as muscle memory** — `nix flake new -t ~/dotfiles#python …` spins a barebones analysis repo (data/output/src, notebook, kernel script) instead of reinventing layout each paper.
+
+What this does *not* try to own: cloud account state, Keychron firmware (JSON backup only), or full macOS visual theming beyond Dock/defaults.
 
 ## Apply
 
@@ -97,11 +114,21 @@ After the flake is applied, in zsh:
 - **Oh My Zsh `git` plugin** — adds many short git aliases (`gst`, `gco`, `gd`, …). List them after apply with: `alias | rg '^g'`
 - **direnv** — when a project has `.envrc` (often `use flake`), entering the directory loads the Nix/dev env automatically
 
-### Ghostty + VS Code themes
+### Ghostty + VS Code themes & font
 
-Ghostty and VS Code both follow **macOS light/dark appearance** with Everforest
-(dark contrast hard / light contrast medium — closest to Ghostty’s shipped themes).
+Ghostty and VS Code follow **macOS light/dark appearance** with Everforest (dark hard / light medium). Font: **IosevkaTerm Nerd Font** (icons for the prompt; dense monospace for code).
 
 VS Code extensions and settings are declared in [`home/vscode.nix`](home/vscode.nix)
-(Python, Jupyter, Ruff, Nix, direnv, etc.). The app itself stays a Homebrew cask
+(Python, Jupyter, Ruff, LaTeX, Astro/MDX, Nix, direnv, …). The app itself stays a Homebrew cask
 for a stable `/Applications/Visual Studio Code.app` Dock path.
+
+## Raycast window management
+
+Configured in the Raycast UI (not in the flake). Current hotkeys:
+
+| Hotkey | Command |
+|---|---|
+| **⌃⌥← / →** | Left Half / Right Half |
+| **⌃⌥U / I / J / K** | Top-left / Top-right / Bottom-left / Bottom-right |
+| **⌃⌥↵** (Return) | Reasonable Maximize |
+| **⌃⌥⌫** (Delete) | Undo |

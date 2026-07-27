@@ -72,7 +72,7 @@
   # Light/dark follow macOS appearance — set System Settings → Appearance → Auto
   # for sunset/schedule switching (Ghostty has no separate clock of its own).
   xdg.configFile."ghostty/config".text = ''
-    font-family = JetBrainsMono Nerd Font
+    font-family = IosevkaTerm Nerd Font
     font-size = 14
     theme = light:Everforest Light Med,dark:Everforest Dark Hard
     macos-option-as-alt = true
