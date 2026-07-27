@@ -69,10 +69,12 @@
   };
 
   # Ghostty config (app itself is a Homebrew cask).
+  # Light/dark follow macOS appearance — set System Settings → Appearance → Auto
+  # for sunset/schedule switching (Ghostty has no separate clock of its own).
   xdg.configFile."ghostty/config".text = ''
     font-family = JetBrainsMono Nerd Font
     font-size = 14
-    theme = Catppuccin Mocha
+    theme = light:Everforest Light Soft,dark:Everforest Dark Soft
     macos-option-as-alt = true
     window-padding-x = 8
     window-padding-y = 6
