@@ -86,8 +86,10 @@ After the flake is applied, in zsh:
 Themes follow **macOS light/dark appearance**:
 
 ```text
-theme = light:Everforest Light Soft,dark:Everforest Dark Soft
+theme = light:Everforest Light Med,dark:Everforest Dark Hard
 ```
+
+(Your Ghostty build ships those two Everforest variants — not Soft.)
 
 For time-of-day switching, set **System Settings → Appearance → Auto** (sunset or custom schedule). Ghostty listens to that; it doesn’t need its own clock.
 

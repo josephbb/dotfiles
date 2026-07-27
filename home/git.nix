@@ -1,4 +1,4 @@
-{ pkgs, config, ... }:
+{ ... }:
 {
   programs.git = {
     enable = true;
@@ -6,8 +6,8 @@
 
     settings = {
       user = {
-        name = "Joseph Bak-Coleman";
-        email = "jbakcoleman@users.noreply.github.com"; # change if you prefer a different address
+        name = "Joe Bak-Coleman";
+        email = "jbakcoleman@gmail.com";
       };
       init.defaultBranch = "main";
       pull.rebase = true;
@@ -46,8 +46,4 @@
       prompt = "enabled";
     };
   };
-
-  home.activation.gitLfsInstall = pkgs.lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    ${pkgs.git-lfs}/bin/git-lfs install --skip-repo
-  '';
 }

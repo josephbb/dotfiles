@@ -33,6 +33,8 @@
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
+            # Back up preexisting dotfiles instead of failing the switch.
+            home-manager.backupFileExtension = "backup";
             home-manager.extraSpecialArgs = { inherit username; };
             home-manager.users.${username} = import ./home;
           }

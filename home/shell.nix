@@ -74,7 +74,7 @@
   xdg.configFile."ghostty/config".text = ''
     font-family = JetBrainsMono Nerd Font
     font-size = 14
-    theme = light:Everforest Light Soft,dark:Everforest Dark Soft
+    theme = light:Everforest Light Med,dark:Everforest Dark Hard
     macos-option-as-alt = true
     window-padding-x = 8
     window-padding-y = 6

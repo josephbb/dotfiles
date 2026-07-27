@@ -27,13 +27,20 @@
       cleanup = "zap";
       upgrade = true;
     };
+    brews = [
+      "defaultbrowser" # CLI used to set the default browser
+    ];
     casks = [
       "ghostty"
       "raycast"
       "visual-studio-code"
+      "firefox"
       "proton-drive"
       "zotero"
       "rstudio"
+      "zoom"
+      "signal"
+      "tidal"
     ];
   };
 
@@ -44,7 +51,24 @@
 
   # Sensible macOS defaults (light touch; expand later).
   system.defaults = {
-    dock.autohide = true;
+    dock = {
+      autohide = true;
+      tilesize = 42; # default is 64; lower = smaller icons
+      orientation = "bottom"; # change to "left" or "right" later if desired
+      show-recents = false;
+      # Curated pins only — rebuild replaces the Dock app list.
+      persistent-apps = [
+        "/Applications/Firefox.app"
+        "/Applications/Ghostty.app"
+        "/Applications/Visual Studio Code.app"
+        "/System/Applications/Messages.app"
+        "/Applications/Signal.app"
+        "/Applications/zoom.us.app"
+        "/Applications/TIDAL.app"
+        "/System/Applications/System Settings.app"
+      ];
+      persistent-others = [ ];
+    };
     finder.FXPreferredViewStyle = "clmv";
     NSGlobalDomain.AppleShowAllExtensions = true;
   };
@@ -55,5 +79,12 @@
     mkdir -p /Users/${username}/Datasets/{raw,derived,scratch}
     chown ${username}:staff /Users/${username}/Projects /Users/${username}/Datasets
     chown -R ${username}:staff /Users/${username}/Datasets
+  '';
+
+  # Set Firefox as default browser (macOS may show a one-time confirmation dialog).
+  system.activationScripts.postActivation.text = ''
+    if [ -x /opt/homebrew/bin/defaultbrowser ]; then
+      sudo -u ${username} /opt/homebrew/bin/defaultbrowser firefox || true
+    fi
   '';
 }
