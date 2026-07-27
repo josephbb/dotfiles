@@ -23,9 +23,11 @@ templates/project/     # research repo starter (flake + uv) — TBD
 ## Fresh Mac
 
 1. Install Xcode CLT and [Determinate Nix](https://determinate.systems/).
-2. Clone this repo to `~/dotfiles`.
+2. Clone this **private** repo to `~/dotfiles` (needs GitHub auth first: `gh auth login` or SSH keys).
 3. `sudo darwin-rebuild switch --flake ~/dotfiles#macbook`
-4. Sign into Apple / Proton; `gh auth login`; import Keychron profile.
+4. Sign into Apple / Proton; confirm `gh auth status`; import Keychron profile.
+
+The flake installs `gh` and git defaults so tooling is portable. **Account login and this private repo’s existence are one-time** — they cannot live in Nix (secrets / cloud identity). On a new machine you authenticate, clone, then rebuild.
 
 ## Data dirs
 
