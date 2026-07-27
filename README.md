@@ -81,22 +81,11 @@ After the flake is applied, in zsh:
 - **Oh My Zsh `git` plugin** — adds many short git aliases (`gst`, `gco`, `gd`, …). List them after apply with: `alias | rg '^g'`
 - **direnv** — when a project has `.envrc` (often `use flake`), entering the directory loads the Nix/dev env automatically
 
-### Ghostty theme note
+### Ghostty + VS Code themes
 
-Themes follow **macOS light/dark appearance**:
+Ghostty and VS Code both follow **macOS light/dark appearance** with Everforest
+(dark contrast hard / light contrast medium — closest to Ghostty’s shipped themes).
 
-```text
-theme = light:Everforest Light Med,dark:Everforest Dark Hard
-```
-
-(Your Ghostty build ships those two Everforest variants — not Soft.)
-
-For time-of-day switching, set **System Settings → Appearance → Auto** (sunset or custom schedule). Ghostty listens to that; it doesn’t need its own clock.
-
-After Ghostty is installed, confirm exact built-in names with:
-
-```bash
-ghostty +list-themes
-```
-
-If labels differ slightly, edit `theme = ...` in `home/shell.nix`, then `rebuild`.
+VS Code extensions and settings are declared in [`home/vscode.nix`](home/vscode.nix)
+(Python, Jupyter, Ruff, Nix, direnv, etc.). The app itself stays a Homebrew cask
+for a stable `/Applications/Visual Studio Code.app` Dock path.

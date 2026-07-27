@@ -4,6 +4,7 @@
     ./packages.nix
     ./shell.nix
     ./git.nix
+    ./vscode.nix
   ];
 
   home.username = username;
