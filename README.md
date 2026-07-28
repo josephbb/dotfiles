@@ -32,7 +32,7 @@ Or use the shell alias after the first successful switch: `rebuild`.
 ```text
 flake.nix              # inputs + darwinConfigurations.macbook + templates
 hosts/macbook/         # nix-darwin: Homebrew casks, fonts, macOS defaults
-home/                  # home-manager: CLI packages, zsh, starship, git, vscode
+home/                  # home-manager: CLI packages, zsh, starship, git, firefox, vscode, zotero
 keychron/              # exported keyboard profiles (backup only)
 templates/python/      # nix flake new -t ~/dotfiles#python …
 ```
@@ -47,11 +47,52 @@ uv sync
 ./scripts/install_kernel.sh
 ```
 
-Barebones layout: `data/`, `output/`, `src/`, `analysis.ipynb`, nix+uv (numpy/scipy/pandas/polars/pymc/arviz/…). See [`templates/python`](templates/python).
+Barebones layout: `data/`, `output/`, `src/`, `analysis.ipynb`, nix+uv (numpy/scipy/pandas/polars/pymc[nutpie]/arviz/…). See [`templates/python`](templates/python).
 
 ## LaTeX
 
 `texlive.combined.scheme-full` is in home-manager (provides `latexmk`, pdflatex, bibtex, etc.). Pair with the LaTeX Workshop VS Code extension. First rebuild downloads a lot; later switches are incremental.
+
+LaTeX Workshop reads shared bibliographies from `~/References/` (see [Zotero](#zotero)).
+
+## Zotero
+
+Zotero is installed via Homebrew cask ([`hosts/macbook/default.nix`](hosts/macbook/default.nix)). Config lives in [`home/zotero.nix`](home/zotero.nix).
+
+| Path / env | Purpose |
+|---|---|
+| `~/References/` | Shared bib exports for papers (`REFERENCES_DIR`) |
+| `~/References/library.bib` | Canonical auto-export target (`ZOTERO_BIB`) |
+| `zot` | Open Zotero |
+| `zot-bib` | Check whether `library.bib` exists and how large it is |
+
+Use **Firefox** (also in the flake) for the [Zotero Connector](https://www.zotero.org/download/connectors) browser extension.
+Connector install is declarative via [`home/firefox.nix`](home/firefox.nix) (Firefox policy force-install).
+
+### One-time setup after install
+
+1. **Migrate from Mendeley** (recommended: Zotero’s built-in importer, not BibTeX/RIS export):
+   - Confirm PDFs open at [mendeley.com](https://www.mendeley.com) (everything synced to Elsevier’s servers).
+   - In Zotero: **File → Import → Mendeley Reference Manager (online import)** and log in.
+   - Optionally disable Zotero auto-sync during the first import (`Zotero → Settings → Sync`).
+   - Import into a dedicated collection (e.g. `Imported from Mendeley`); spot-check metadata, PDFs, folders, and highlights before deleting anything in Mendeley.
+   - Group libraries: copy items into a personal Mendeley folder first — the importer cannot read group libraries directly.
+   - Details: [Zotero Mendeley import guide](https://www.zotero.org/support/kb/mendeley_import)
+
+2. **Better BibTeX** (auto-export for LaTeX):
+   - Install from [Better BibTeX](https://retorque.re/zotero-better-bibtex/installation/index.html) (Zotero add-on).
+   - **File → Export Library…** once, choose *Better BibLaTeX*, save to `~/References/library.bib`.
+   - Right-click the export in the left pane → **Keep updated** (auto-export on library changes).
+   - VS Code LaTeX Workshop already includes `~/References` in `bibDirs` ([`home/vscode.nix`](home/vscode.nix)).
+
+3. **Sync**: Zotero’s own sync (300 MB free) for library + attachments; don’t put the live Zotero data directory on Proton Drive.
+
+4. **Firefox Connector**:
+   - Installed automatically by Home Manager policy on `rebuild`.
+   - If Firefox was open during rebuild, quit/reopen Firefox once.
+   - Confirm in `about:addons` that Zotero Connector is enabled.
+
+In paper repos, cite with `\cite{key}` and either symlink `~/References/library.bib` or add a project-local `refs.bib` that `@`‑imports the shared library.
 
 ## Fresh Mac
 
@@ -66,6 +107,7 @@ The flake installs `gh` and git defaults so tooling is portable. **Account login
 
 - `~/Projects` — git clones
 - `~/Datasets/{raw,derived,scratch}` — large / temporary / never-on-GitHub data
+- `~/References` — Zotero bib exports for LaTeX (`library.bib` via Better BibTeX)
 
 ## Shell cheat sheet
 
@@ -81,6 +123,7 @@ Aliases and tools declared in [`home/shell.nix`](home/shell.nix) (plus related C
 | `cat` | `bat` | File viewer with syntax highlighting / paging |
 | `g` | `git` | Shorthand for git |
 | `rebuild` | `sudo darwin-rebuild switch --flake ~/dotfiles#macbook` | Re-apply this flake after edits |
+| `zot` | `open -a Zotero` | Open Zotero |
 
 ### Related tools (no alias — type the name)
 
@@ -95,6 +138,7 @@ Aliases and tools declared in [`home/shell.nix`](home/shell.nix) (plus related C
 | `tldr cmd` | `tldr tar` | Short practical examples |
 | `uv` | `uv --help` | Python envs / packages |
 | `direnv` | needs `.envrc` in a project | Auto-load project env on `cd` |
+| `zot-bib` | run after BBT export | Show path and line count of `~/References/library.bib` |
 
 ### Fuzzy find (fzf) keybindings
 
@@ -116,7 +160,7 @@ After the flake is applied, in zsh:
 
 ### Ghostty + VS Code themes & font
 
-Ghostty and VS Code follow **macOS light/dark appearance** with Everforest (dark hard / light medium). Font: **IosevkaTerm Nerd Font** (icons for the prompt; dense monospace for code).
+Ghostty stays on **Everforest Dark Hard** always. VS Code can still follow macOS light/dark with Everforest. Font: **IosevkaTerm Nerd Font**.
 
 VS Code extensions and settings are declared in [`home/vscode.nix`](home/vscode.nix)
 (Python, Jupyter, Ruff, LaTeX, Astro/MDX, Nix, direnv, …). The app itself stays a Homebrew cask
@@ -132,3 +176,21 @@ Configured in the Raycast UI (not in the flake). Current hotkeys:
 | **⌃⌥U / I / J / K** | Top-left / Top-right / Bottom-left / Bottom-right |
 | **⌃⌥↵** (Return) | Reasonable Maximize |
 | **⌃⌥⌫** (Delete) | Undo |
+| **⌘⇧S** | Snippets (open / search) |
+
+### Snippet ideas
+
+| Keyword | Expands to |
+|---|---|
+| `;sig` | Email signature (Joe Bak-Coleman / UW / joebakcoleman.com) |
+| `;web` | `https://joebakcoleman.com` |
+| `;email` | Your preferred contact address |
+| `;zoom` | Standing Zoom/meeting link (if you have one) |
+| `;addr` | Mailing address for forms (if useful) |
+| `;thanks` | Short polite close (“Thanks, Joe”) |
+| `;avail` | “I’m free … — does that work?” scheduling line |
+| `;cite` | `Bak-Coleman et al.` or a go-to paper citation stub |
+| `;path` | `~/Projects/` or `~/Datasets/` |
+| `;gh` | `https://github.com/josephbb/` |
+| `;arxiv` | `https://arxiv.org/abs/` (cursor after for the id) |
+| `;mu` / `;emdash` | `μ` / `—` (if you don’t use Raycast symbol search) |

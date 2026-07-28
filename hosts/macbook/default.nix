@@ -77,7 +77,8 @@
   system.activationScripts.extraActivation.text = ''
     mkdir -p /Users/${username}/Projects
     mkdir -p /Users/${username}/Datasets/{raw,derived,scratch}
-    chown ${username}:staff /Users/${username}/Projects /Users/${username}/Datasets
+    mkdir -p /Users/${username}/References
+    chown ${username}:staff /Users/${username}/Projects /Users/${username}/Datasets /Users/${username}/References
     chown -R ${username}:staff /Users/${username}/Datasets
   '';
 

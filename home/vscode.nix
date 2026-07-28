@@ -1,4 +1,8 @@
-{ pkgs, ... }:
+{
+  pkgs,
+  config,
+  ...
+}:
 let
   everforest = pkgs.vscode-utils.extensionFromVscodeMarketplace {
     name = "everforest";
@@ -119,6 +123,10 @@ in
           }
         ];
         "latex-workshop.view.pdf.viewer" = "tab";
+        # Shared bib export from Zotero (Better BibTeX → ~/References/library.bib)
+        "latex-workshop.bibtex.bibDirs" = [
+          "${config.home.homeDirectory}/References"
+        ];
 
         # Prettier for the Astro blog (and MD/MDX); Ruff stays for Python
         "editor.defaultFormatter" = "esbenp.prettier-vscode";

@@ -4,7 +4,9 @@
     ./packages.nix
     ./shell.nix
     ./git.nix
+    ./firefox.nix
     ./vscode.nix
+    ./zotero.nix
   ];
 
   home.username = username;

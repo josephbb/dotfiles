@@ -21,9 +21,9 @@ output/               # figures, tables, traces (gitignored contents)
 src/                  # your modules
 scripts/install_kernel.sh
 flake.nix             # dev shell + native libs for SciPy/PyMC
-pyproject.toml        # numpy, scipy, pandas, polars, pymc, arviz, …
+pyproject.toml        # numpy, scipy, pandas, polars, pymc[nutpie], arviz, …
 ```
 
 ## Stack
 
-numpy, scipy, pandas, polars, pymc (≥6), arviz, xarray, matplotlib — plus `ipykernel` for notebooks.
+numpy, scipy, pandas, polars, pymc (≥6) with nutpie, arviz, xarray, matplotlib — plus `ipykernel` for notebooks.
