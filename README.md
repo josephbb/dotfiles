@@ -51,7 +51,7 @@ Barebones layout: `data/`, `output/`, `src/`, `analysis.ipynb`, nix+uv (numpy/sc
 
 ## LaTeX
 
-`texlive.combined.scheme-full` is in home-manager (provides `latexmk`, pdflatex, bibtex, etc.). Pair with the LaTeX Workshop VS Code extension. First rebuild downloads a lot; later switches are incremental.
+`texliveFull` is in home-manager (provides `latexmk`, pdflatex, bibtex, etc.). Pair with the LaTeX Workshop VS Code extension. First rebuild downloads a lot; later switches are incremental.
 
 LaTeX Workshop reads shared bibliographies from `~/References/` (see [Zotero](#zotero)).
 
@@ -65,6 +65,7 @@ Zotero is installed via Homebrew cask ([`hosts/macbook/default.nix`](hosts/macbo
 | `~/References/library.bib` | Canonical auto-export target (`ZOTERO_BIB`) |
 | `zot` | Open Zotero |
 | `zot-bib` | Check whether `library.bib` exists and how large it is |
+| `zot-plugins` | Print plugin repos managed by dotfiles |
 
 Use **Firefox** (also in the flake) for the [Zotero Connector](https://www.zotero.org/download/connectors) browser extension.
 Connector install is declarative via [`home/firefox.nix`](home/firefox.nix) (Firefox policy force-install).
@@ -79,10 +80,16 @@ Connector install is declarative via [`home/firefox.nix`](home/firefox.nix) (Fir
    - Group libraries: copy items into a personal Mendeley folder first — the importer cannot read group libraries directly.
    - Details: [Zotero Mendeley import guide](https://www.zotero.org/support/kb/mendeley_import)
 
-2. **Better BibTeX** (auto-export for LaTeX):
-   - Install from [Better BibTeX](https://retorque.re/zotero-better-bibtex/installation/index.html) (Zotero add-on).
-   - **File → Export Library…** once, choose *Better BibLaTeX*, save to `~/References/library.bib`.
-   - Right-click the export in the left pane → **Keep updated** (auto-export on library changes).
+2. **Plugins** (installed automatically on `rebuild` for existing Zotero profiles):
+   - Managed in [`home/zotero.nix`](home/zotero.nix) from GitHub releases.
+   - If Zotero has never been opened on this machine, open it once to create profiles, then `rebuild` again.
+   - Current plugin set:
+     - [Better BibTeX](https://github.com/retorquere/zotero-better-bibtex) — stable citekeys + auto-export
+     - [Zoplicate](https://github.com/ChenglongMa/zoplicate) — duplicate detection/merge workflow
+     - [Better Notes](https://github.com/windingwind/zotero-better-notes) — advanced note workflows
+     - [ZotMoov](https://github.com/wileyyugioh/zotmoov) — attachment move/link management
+     - [Actions & Tags](https://github.com/windingwind/zotero-actions-tags) — workflow automation
+   - For LaTeX: **File → Export Library…** once, choose *Better BibLaTeX*, save to `~/References/library.bib`, then right-click export → **Keep updated**.
    - VS Code LaTeX Workshop already includes `~/References` in `bibDirs` ([`home/vscode.nix`](home/vscode.nix)).
 
 3. **Sync**: Zotero’s own sync (300 MB free) for library + attachments; don’t put the live Zotero data directory on Proton Drive.
@@ -102,6 +109,27 @@ In paper repos, cite with `\cite{key}` and either symlink `~/References/library.
 4. Sign into Apple / Proton; confirm `gh auth status`; import Keychron profile.
 
 The flake installs `gh` and git defaults so tooling is portable. **Account login and this private repo’s existence are one-time** — they cannot live in Nix (secrets / cloud identity). On a new machine you authenticate, clone, then rebuild.
+
+## Auto-clone projects
+
+`hosts/macbook/projects.toml` can declare repos that should exist in `~/Projects` after `rebuild`.
+The activation script only clones when the destination folder does **not** already exist.
+
+Example:
+
+```toml
+[[projects]]
+name = "my-analysis"
+url = "git@github.com:your-org/my-analysis.git"
+dest = "my-analysis" # optional; defaults to name
+enabled = true       # optional; defaults to true
+```
+
+Notes:
+
+- Existing directories are never overwritten or pulled — active work is left alone.
+- Clones run as your user (not root) during activation.
+- Use SSH URLs if you already use SSH keys with GitHub.
 
 ## Data dirs
 

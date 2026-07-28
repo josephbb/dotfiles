@@ -1,8 +1,28 @@
 {
+  lib,
   pkgs,
   username,
   ...
 }:
+let
+  projectsManifest = builtins.fromTOML (builtins.readFile ./projects.toml);
+  configuredProjects = projectsManifest.projects or [ ];
+  enabledProjects = lib.filter (project: project.enabled or true) configuredProjects;
+  projectCloneScript = lib.concatMapStringsSep "\n" (
+    project:
+    let
+      destination = project.dest or project.name;
+    in
+    ''
+      if [ -d "/Users/${username}/Projects/${destination}" ]; then
+        echo "Projects: ${destination} exists, skipping clone."
+      else
+        echo "Projects: cloning ${project.url} -> ${destination}"
+        sudo -u ${username} git clone "${project.url}" "/Users/${username}/Projects/${destination}"
+      fi
+    ''
+  ) enabledProjects;
+in
 {
   # Determinate Nix manages the nix installation; don't let nix-darwin clobber it.
   nix.enable = false;
@@ -80,6 +100,8 @@
     mkdir -p /Users/${username}/References
     chown ${username}:staff /Users/${username}/Projects /Users/${username}/Datasets /Users/${username}/References
     chown -R ${username}:staff /Users/${username}/Datasets
+
+    ${projectCloneScript}
   '';
 
   # Set Firefox as default browser (macOS may show a one-time confirmation dialog).

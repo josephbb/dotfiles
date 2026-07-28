@@ -33,11 +33,11 @@
     pandoc
     R
 
-    # LaTeX (large first download; latexmk + full CTAN for papers/ArXiv)
-    texlive.combined.scheme-full
+    # LaTeX (large first download; full TeX Live for papers/ArXiv)
+    texliveFull
 
     # Nix ergonomics
-    nixfmt-rfc-style
+    nixfmt
     nil
   ];
 }
