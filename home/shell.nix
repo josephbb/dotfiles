@@ -28,6 +28,8 @@
       feature = "${config.home.homeDirectory}/dotfiles/scripts/feature.sh";
       feature-enable = "${config.home.homeDirectory}/dotfiles/scripts/feature.sh enable";
       feature-disable = "${config.home.homeDirectory}/dotfiles/scripts/feature.sh disable";
+      # Containers: start the Colima VM, then use docker as usual
+      colima-start = "colima start --cpu 4 --memory 8 --disk 60";
     };
 
     initContent = ''
@@ -75,6 +77,39 @@
   programs.zoxide = {
     enable = true;
     enableZshIntegration = true;
+  };
+
+  # Persistent sessions for long jobs (MCMC, pulls, watches). Prefix: Ctrl-a.
+  programs.tmux = {
+    enable = true;
+    shortcut = "a";
+    baseIndex = 1;
+    escapeTime = 0;
+    historyLimit = 50000;
+    mouse = true;
+    terminal = "tmux-256color";
+    extraConfig = ''
+      set -g renumber-windows on
+      set -g status-position bottom
+      set -g status-left-length 40
+      set -g status-left '#[bold]#S#[default] '
+      set -g status-right '%Y-%m-%d %H:%M '
+      set -g status-style 'bg=default,fg=colour246'
+      set -g window-status-current-style 'fg=colour223,bold'
+      set -g pane-border-style 'fg=colour238'
+      set -g pane-active-border-style 'fg=colour142'
+
+      # Splits inherit current path
+      bind '"' split-window -c "#{pane_current_path}"
+      bind % split-window -h -c "#{pane_current_path}"
+      bind c new-window -c "#{pane_current_path}"
+
+      # Vim-ish pane movement
+      bind h select-pane -L
+      bind j select-pane -D
+      bind k select-pane -U
+      bind l select-pane -R
+    '';
   };
 
   # Ghostty config (app itself is a Homebrew cask).

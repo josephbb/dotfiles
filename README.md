@@ -1,238 +1,375 @@
 # dotfiles
 
-Declarative macOS setup for Joe’s machine via **nix-darwin** + **home-manager**.
+Declarative macOS setup for Joe’s machine via **[nix-darwin](https://github.com/nix-darwin/nix-darwin)** + **[home-manager](https://github.com/nix-community/home-manager)**. Edit config → `rebuild` → the laptop matches.
+
+## Table of contents
+
+- [Why this setup](#why-this-setup)
+- [Quick start](#quick-start)
+- [Repo layout](#repo-layout)
+- [What’s installed](#whats-installed)
+  - [GUI apps (Homebrew)](#gui-apps-homebrew)
+  - [Dock](#dock)
+  - [Shell & CLI](#shell--cli)
+  - [Research stack](#research-stack)
+  - [Editors](#editors)
+  - [Fonts & themes](#fonts--themes)
+- [Cheat sheets](#cheat-sheets)
+  - [Aliases](#aliases)
+  - [Everyday CLI](#everyday-cli)
+  - [Git](#git)
+  - [fzf](#fzf)
+  - [tmux](#tmux)
+  - [Docker / Colima](#docker--colima)
+  - [Python projects](#python-projects)
+  - [R / Quarto / LaTeX](#r--quarto--latex)
+  - [Secrets (OpenAlex)](#secrets-openalex)
+- [Data directories](#data-directories)
+- [Secrets (agenix)](#secrets-agenix)
+- [Zotero](#zotero)
+- [Projects & templates](#projects--templates)
+- [Optional: Ollama + Continue](#optional-ollama--continue)
+- [Fresh Mac](#fresh-mac)
+- [Raycast](#raycast)
+
+---
 
 ## Why this setup
 
-A single private repo is the source of truth for the machine. Edit config → `rebuild` → the laptop matches. That buys:
+- **New Mac in an afternoon** — Determinate Nix + clone + `darwin-rebuild switch` restores CLI, shell, fonts, Dock, VS Code extensions, and apps.
+- **Reproducible** — versions pinned in [`flake.lock`](flake.lock); not a drifting pile of brew installs.
+- **Clear split**
+  - **nix-darwin** — Homebrew casks, fonts, Dock/Finder, folder layout ([`hosts/macbook/`](hosts/macbook/))
+  - **home-manager** — PATH packages, zsh, git, editors, secrets ([`home/`](home/))
+  - **Project flakes + uv** — per-repo science stacks, not one global Python
+- **Research-shaped** — `~/Projects`, Proton-backed `~/Datasets/{raw,derived}`, local `scratch`, TeX Live, Zotero → bib, no conda.
+- **Secrets stay encrypted** — API keys via [agenix](https://github.com/ryantm/agenix); Apple/Proton/`gh auth` stay interactive.
 
-- **New Mac in an afternoon** — Install Determinate Nix, clone this repo, `darwin-rebuild switch`. CLI tools, shell, fonts, Dock, VS Code extensions, and app installs come back without a checklist of downloads.
-- **Reproducible, not “snowflake”** — Versions are pinned in `flake.lock`. The same flake on another machine (or after a wipe) yields the same environment, instead of drifting Homebrew installs and forgotten prefs.
-- **Clear split of concerns**
-  - **nix-darwin** — system-ish: Homebrew casks, fonts, Dock/Finder defaults, folder layout
-  - **home-manager** — your user env: packages on `PATH`, zsh/Starship, git, Ghostty config, VS Code settings/extensions
-  - **Project flakes + uv** — per-repo science stacks (PyMC, etc.), not one giant global Python
-- **Research-shaped defaults** — `~/Projects` for git, `~/Datasets` for bulky/scratch data (not in Drive sync), LaTeX via TeX Live, Jupyter kernels from project templates, no conda.
-- **Editor ready for the real work** — VS Code ships with Python/Ruff/Jupyter, LaTeX Workshop, Astro/MDX/Prettier (blog), Nix/direnv — themes track macOS light/dark.
-- **Portable identity, local secrets** — `gh`/git/SSH tooling is declared here; logins, Proton/Apple accounts, and API keys stay out of the flake (as they should).
-- **Templates as muscle memory** — `nix flake new -t ~/dotfiles#python …` spins a barebones analysis repo (data/output/src, notebook, kernel script) instead of reinventing layout each paper.
+What this does *not* own: cloud account state, Keychron firmware (JSON backup only), Cursor settings (separate from VS Code), or full macOS visual theming beyond Dock/defaults.
 
-What this does *not* try to own: cloud account state, Keychron firmware (JSON backup only), or full macOS visual theming beyond Dock/defaults.
-API keys can still live here safely as encrypted `agenix` files.
+---
 
-## Apply
+## Quick start
+
+```bash
+rebuild    # alias → scripts/rebuild.sh
+```
+
+Or:
 
 ```bash
 sudo darwin-rebuild switch --flake ~/dotfiles#macbook
 ```
 
-Or use the shell alias after the first successful switch: `rebuild`.
+[`scripts/rebuild.sh`](scripts/rebuild.sh) then runs safe cleanup: `brew cleanup`, nix GC, store optimise, and `ollama prune` if Ollama is present (**does not** pull models).
 
-`rebuild` is [`scripts/rebuild.sh`](scripts/rebuild.sh): apply the flake, then safe cleanup —
+Toggle optional features: `feature status` · `feature-enable ollama` · `feature-disable ollama` ([`scripts/feature.sh`](scripts/feature.sh)).
 
-1. `brew cleanup -s`
-2. `sudo nix-collect-garbage -d` (drops old Nix generations)
-3. `nix store optimise`
-4. `ollama prune` if Ollama is installed (retired tags + interrupted partial downloads only — **does not** pull models)
+---
 
-For a full local-model refresh after enabling Ollama: `ollama-setup`.
-
-## Layout
+## Repo layout
 
 ```text
-flake.nix              # inputs + darwinConfigurations.macbook + templates
-hosts/macbook/         # nix-darwin: Homebrew casks, fonts, macOS defaults, features.toml
-home/                  # home-manager: CLI, research tools, zsh, git, firefox, vscode, zotero, ollama
-secrets/               # agenix-encrypted secrets + recipients
-keychron/              # exported keyboard profiles (backup only)
-templates/python/      # nix flake new -t ~/dotfiles#python …
-scripts/               # helpers (feature enable/disable, …)
+flake.nix                 # inputs, darwinConfigurations.macbook, templates
+hosts/macbook/            # nix-darwin: casks, fonts, Dock, features.toml, projects.toml
+home/                     # home-manager modules
+  packages.nix            # general CLI
+  research.nix            # R / Quarto / TeX / just / duckdb / …
+  secrets.nix             # agenix wiring
+  shell.nix               # zsh, starship, fzf, zoxide, tmux, Ghostty
+  git.nix                 # git + gh + delta
+  vscode.nix / firefox.nix / zotero.nix / ollama.nix
+secrets/                  # encrypted .age files
+secrets.nix               # agenix recipients (SSH public keys)
+templates/python/         # nix flake new -t ~/dotfiles#python …
+scripts/                  # rebuild, feature, ollama-setup, ssh-key-backup
+keychron/                 # keyboard profile backup only
 ```
 
-## New research project
+Default branch: **`main`**.
+
+---
+
+## What’s installed
+
+### GUI apps (Homebrew)
+
+Declared in [`hosts/macbook/default.nix`](hosts/macbook/default.nix):
+
+| App | Role |
+|---|---|
+| [Ghostty](https://ghostty.org/) | Terminal |
+| [Raycast](https://www.raycast.com/) | Launcher / window mgmt (hotkeys set in UI) |
+| [Visual Studio Code](https://code.visualstudio.com/) | Primary editor (extensions via HM) |
+| [Firefox](https://www.mozilla.org/firefox/) | Browser + Zotero Connector |
+| [Proton Drive](https://proton.me/drive) | Sync (Datasets raw/derived, SSH key backup) |
+| [Zotero](https://www.zotero.org/) | Reference manager |
+| [RStudio](https://posit.co/products/open-source/rstudio/) | R IDE |
+| Zoom, Signal, TIDAL | Meetings / chat / music |
+| Ollama | Local LLMs — **only if** `[ollama] enabled` in [`features.toml`](hosts/macbook/features.toml) |
+
+### Dock
+
+Pinned (rebuild replaces the list): Firefox, Ghostty, VS Code, RStudio, Messages, Signal, Zoom, TIDAL, System Settings.
+
+### Shell & CLI
+
+From [`home/packages.nix`](home/packages.nix) + [`home/shell.nix`](home/shell.nix) + [`home/git.nix`](home/git.nix):
+
+| Area | Tools |
+|---|---|
+| Shell | zsh, Oh My Zsh (`git`, `fzf`), Starship, autosuggestions, syntax highlighting |
+| Navigation | `eza`, `zoxide` (`z`/`zi`), `fzf`, `tree` |
+| Search / view | `ripgrep` (`rg`), `fd`, `bat`, `glow`, `jq`, `yq` |
+| Git | `git`, `git-lfs`, `gh`, `lazygit`, **delta** diffs |
+| Process | `htop`, `btop`, `tmux` |
+| Containers | `colima`, `docker`, `docker-compose` |
+| Python tooling | `uv`, `direnv`, `nix-direnv` |
+| Nix | `nixfmt`, `nil` |
+| Misc | `curl`, `wget`, `tldr`, `shellcheck`, `sl`, `agenix` |
+
+### Research stack
+
+From [`home/research.nix`](home/research.nix):
+
+| Tool | Role |
+|---|---|
+| `just` | Task runner (simpler than Make) |
+| `watchexec` | Re-run commands on file change |
+| `sqlite` / `duckdb` | Quick tabular analysis |
+| `R` + `radian` | R + nicer REPL |
+| `quarto` / `pandoc` | Publishing |
+| `texliveFull` | Full TeX Live (`latexmk`, pdflatex, bibtex, …) |
+
+### Editors
+
+**VS Code** — app via brew; settings/extensions in [`home/vscode.nix`](home/vscode.nix):
+
+| Extension area | Packages |
+|---|---|
+| Python | Python, Pylance, debugpy, Jupyter, Ruff |
+| Config / Nix | direnv, nix-ide, even-better-toml, vscode-yaml |
+| Docs / git | PR GitHub, Markdown All in One |
+| Papers | LaTeX Workshop, Code Spell Checker, LTeX |
+| Blog | Astro, MDX, Prettier |
+| Theme | Everforest (follows macOS light/dark) |
+
+**RStudio** — brew cask; uses nixpkgs `R` on PATH. Prefer `radian` in the terminal.
+
+**Cursor** — not managed by this flake (separate settings/extensions).
+
+### Fonts & themes
+
+| Where | Theme / font |
+|---|---|
+| Ghostty | Everforest Dark Hard · **IosevkaTerm Nerd Font** 14 |
+| VS Code | Everforest Dark/Light via `autoDetectColorScheme` · same font family 13 |
+| System font | `nerd-fonts.iosevka-term` via nix-darwin |
+
+---
+
+## Cheat sheets
+
+### Aliases
+
+Declared in [`home/shell.nix`](home/shell.nix) (plus Zotero / secrets / Ollama modules):
+
+| Alias | What it does |
+|---|---|
+| `ls` / `ll` / `la` | `eza` (long + git column) |
+| `cat` | `bat` |
+| `g` | `git` |
+| `rebuild` | Apply flake + cleanup ([`scripts/rebuild.sh`](scripts/rebuild.sh)) |
+| `feature` / `feature-enable` / `feature-disable` | Optional features ([`features.toml`](hosts/macbook/features.toml)) |
+| `colima-start` | Start Docker VM (4 CPU / 8 GB / 60 GB disk) |
+| `zot` / `zot-bib` / `zot-plugins` | Zotero helpers |
+| `openalex-load` / `openalex-show-path` | Load / show OpenAlex env file |
+| `ollama-setup` / `status` / `pull-defaults` / `prune` | Local LLM helpers (when enabled) |
+
+Oh My Zsh also adds many short git aliases (`gst`, `gco`, `gd`, …). List with: `alias | rg '^g'`.
+
+### Everyday CLI
+
+| Command | Try this | Notes |
+|---|---|---|
+| `eza` | `eza -T` | Tree view |
+| `bat README.md` | `bat -A file` | Syntax + pager; shows non-printing with `-A` |
+| `fd pattern` | `fd -e py` | Fast find |
+| `rg pattern` | `rg -n TODO` | Fast content search |
+| `jq` | `jq . file.json` | JSON |
+| `yq` | `yq '.key' file.yaml` | YAML (jq-like) |
+| `z projects` | `zi` | Jump to frecent dirs / interactive |
+| `tldr tar` | | Short examples vs full man pages |
+| `glow README.md` | | Render markdown in terminal |
+| `htop` / `btop` | | Process monitors |
+| `nil` | | Nix LSP (used by VS Code) |
+| `nixfmt` | `nixfmt file.nix` | Format Nix |
+
+### Git
+
+| Command | Notes |
+|---|---|
+| `g st` / `git st` | Short status (`status -sb`) |
+| `g lg` | Compact graph log |
+| `git diff` / `git show` | Paged via **delta** (line numbers on) |
+| `lazygit` | TUI for stage/commit/push |
+| `gh` | GitHub CLI (`git_protocol = ssh`) |
+
+Config: [`home/git.nix`](home/git.nix).
+
+### fzf
+
+| Keys | Action |
+|---|---|
+| `Ctrl-R` | Fuzzy search command history |
+| `Ctrl-T` | Fuzzy find a file; paste path |
+| `Alt-C` | Fuzzy find a directory and `cd` |
+
+### tmux
+
+Prefix is **`Ctrl-a`** (then the key below). Config in [`home/shell.nix`](home/shell.nix).
+
+| Keys | Action |
+|---|---|
+| `Ctrl-a c` | New window |
+| `Ctrl-a ,` | Rename window |
+| `Ctrl-a "` / `%` | Split horizontal / vertical (keeps cwd) |
+| `Ctrl-a h/j/k/l` | Move between panes |
+| `Ctrl-a z` | Zoom pane (toggle) |
+| `Ctrl-a d` | Detach (session keeps running) |
+| `Ctrl-a [` | Scroll / copy mode (`q` to quit) |
+
+```bash
+tmux new -s paper          # named session
+tmux attach -t paper       # come back
+tmux ls                    # list sessions
+```
+
+Good for long MCMC / pulls / watches; detach and reopen Ghostty later.
+
+### Docker / Colima
+
+No Docker Desktop — **Colima** provides the VM:
+
+```bash
+colima-start               # once per reboot / when needed
+docker ps
+docker compose up
+colima stop
+```
+
+### Python projects
 
 ```bash
 nix flake new -t ~/dotfiles#python ~/Projects/my-analysis
 cd ~/Projects/my-analysis
-direnv allow    # or: nix develop
+direnv allow               # loads flake env on cd (or: nix develop)
 uv sync
 ./scripts/install_kernel.sh
 ```
 
-Barebones layout: `data/`, `output/`, `src/`, `analysis.ipynb`, `palettes.toml` (named plot colors via `src.palettes`), nix+uv (numpy/scipy/pandas/polars/pymc[nutpie]/arviz/…). See [`templates/python`](templates/python).
+Layout: `data/`, `output/`, `src/`, `analysis.ipynb`, `palettes.toml`. Stack via uv: numpy/scipy/pandas/polars/pymc/arviz/…. See [`templates/python`](templates/python).
 
-## LaTeX
+**direnv:** if a project has `.envrc` with `use flake`, `cd` auto-loads the env after one `direnv allow`. You don’t need `nix develop` every time.
 
-`texliveFull` is in home-manager (provides `latexmk`, pdflatex, bibtex, etc.). Pair with the LaTeX Workshop VS Code extension. First rebuild downloads a lot; later switches are incremental.
+### R / Quarto / LaTeX
 
-LaTeX Workshop reads shared bibliographies from `~/References/` (see [Zotero](#zotero)).
+| Command | Notes |
+|---|---|
+| `radian` | Preferred R console |
+| `R` | Stock R |
+| `quarto preview` | Quarto projects |
+| `latexmk -pdf paper.tex` | TeX Live via `texliveFull` |
+| RStudio | GUI; Dock pin |
+
+Bib: LaTeX Workshop reads `~/References/` ([Zotero](#zotero)).
+
+### Secrets (OpenAlex)
+
+```bash
+agenix -e secrets/openalex.env.age   # edit encrypted file
+rebuild
+openalex-load                        # source into current shell
+echo "$OPENALEX_API_KEY"             # should be set
+```
+
+---
+
+## Data directories
+
+| Path | Where it lives | Purpose |
+|---|---|---|
+| `~/Projects` | Local | Git clones |
+| `~/Datasets/raw` | → Proton Drive `Datasets/raw` | Immutable inputs (synced) |
+| `~/Datasets/derived` | → Proton Drive `Datasets/derived` | Processed outputs (synced) |
+| `~/Datasets/scratch` | Local only | Temp / never sync |
+| `~/References` | Local | Zotero bib exports (`library.bib`) |
+
+Symlinks keep `~/Datasets/raw` and `~/Datasets/derived` stable. If Proton Drive isn’t signed in, activation uses local folders until the next `rebuild` after the client appears.
+
+SSH key backup (for agenix / GitHub on a new Mac):  
+`~/Library/CloudStorage/ProtonDrive-*/SSHKeys/` — refresh with [`scripts/ssh-key-backup.sh`](scripts/ssh-key-backup.sh).
+
+---
+
+## Secrets (agenix)
+
+Encrypted files in git; decrypted at activation with `~/.ssh/id_ed25519`.
+
+| File | Purpose |
+|---|---|
+| [`secrets.nix`](secrets.nix) | Recipients (SSH public keys) |
+| [`secrets/openalex.env.age`](secrets/openalex.env.age) | OpenAlex credentials |
+| [`home/secrets.nix`](home/secrets.nix) | Wire secrets → env / aliases |
+
+**New / second machine (preferred — rekey):** add the new host’s public key to `secrets.nix` → on an old machine `agenix --rekey` → commit → on the new machine restore private key → `rebuild`.
+
+**Wipe recovery:** copy key from Proton `SSHKeys/` (see [Data directories](#data-directories)).
+
+**Add another secret:** entry in `secrets.nix` → `agenix -e secrets/….age` → declare in `home/secrets.nix` → `rebuild`.
+
+---
 
 ## Zotero
 
-Zotero is installed via Homebrew cask ([`hosts/macbook/default.nix`](hosts/macbook/default.nix)). Config lives in [`home/zotero.nix`](home/zotero.nix).
+Cask + config in [`home/zotero.nix`](home/zotero.nix). Firefox Connector via [`home/firefox.nix`](home/firefox.nix).
 
-| Path / env | Purpose |
+| Path / command | Purpose |
 |---|---|
-| `~/References/` | Shared bib exports for papers (`REFERENCES_DIR`) |
-| `~/References/library.bib` | Canonical auto-export target (`ZOTERO_BIB`) |
-| `zot` | Open Zotero |
-| `zot-bib` | Check whether `library.bib` exists and how large it is |
-| `zot-plugins` | Print plugin repos managed by dotfiles |
+| `~/References/` | Shared bib exports (`REFERENCES_DIR`) |
+| `~/References/library.bib` | Canonical Better BibTeX target (`ZOTERO_BIB`) |
+| `zot` / `zot-bib` / `zot-plugins` | Open / check bib / list managed plugins |
 
-Use **Firefox** (also in the flake) for the [Zotero Connector](https://www.zotero.org/download/connectors) browser extension.
-Connector install is declarative via [`home/firefox.nix`](home/firefox.nix) (Firefox policy force-install).
+**Plugins (auto on rebuild):** [Better BibTeX](https://github.com/retorquere/zotero-better-bibtex), [Zoplicate](https://github.com/ChenglongMa/zoplicate), [Better Notes](https://github.com/windingwind/zotero-better-notes), [ZotMoov](https://github.com/wileyyugioh/zotmoov), [Actions & Tags](https://github.com/windingwind/zotero-actions-tags).
 
-### One-time setup after install
+**One-time:** open Zotero once if brand new → `rebuild` for plugins → export Better BibLaTeX to `~/References/library.bib` with **Keep updated**. Use Zotero’s own sync for the library; don’t put the live Zotero data dir on Proton Drive.
 
-1. **Migrate from Mendeley** (recommended: Zotero’s built-in importer, not BibTeX/RIS export):
-   - Confirm PDFs open at [mendeley.com](https://www.mendeley.com) (everything synced to Elsevier’s servers).
-   - In Zotero: **File → Import → Mendeley Reference Manager (online import)** and log in.
-   - Optionally disable Zotero auto-sync during the first import (`Zotero → Settings → Sync`).
-   - Import into a dedicated collection (e.g. `Imported from Mendeley`); spot-check metadata, PDFs, folders, and highlights before deleting anything in Mendeley.
-   - Group libraries: copy items into a personal Mendeley folder first — the importer cannot read group libraries directly.
-   - Details: [Zotero Mendeley import guide](https://www.zotero.org/support/kb/mendeley_import)
+**Mendeley import:** [Zotero guide](https://www.zotero.org/support/kb/mendeley_import) — prefer online importer over RIS/BibTeX dump.
 
-2. **Plugins** (installed automatically on `rebuild` for existing Zotero profiles):
-   - Managed in [`home/zotero.nix`](home/zotero.nix) from GitHub releases.
-   - If Zotero has never been opened on this machine, open it once to create profiles, then `rebuild` again.
-   - Current plugin set:
-     - [Better BibTeX](https://github.com/retorquere/zotero-better-bibtex) — stable citekeys + auto-export
-     - [Zoplicate](https://github.com/ChenglongMa/zoplicate) — duplicate detection/merge workflow
-     - [Better Notes](https://github.com/windingwind/zotero-better-notes) — advanced note workflows
-     - [ZotMoov](https://github.com/wileyyugioh/zotmoov) — attachment move/link management
-     - [Actions & Tags](https://github.com/windingwind/zotero-actions-tags) — workflow automation
-   - For LaTeX: **File → Export Library…** once, choose *Better BibLaTeX*, save to `~/References/library.bib`, then right-click export → **Keep updated**.
-   - VS Code LaTeX Workshop already includes `~/References` in `bibDirs` ([`home/vscode.nix`](home/vscode.nix)).
+---
 
-3. **Sync**: Zotero’s own sync (300 MB free) for library + attachments; don’t put the live Zotero data directory on Proton Drive.
+## Projects & templates
 
-4. **Firefox Connector**:
-   - Installed automatically by Home Manager policy on `rebuild`.
-   - If Firefox was open during rebuild, quit/reopen Firefox once.
-   - Confirm in `about:addons` that Zotero Connector is enabled.
+**Auto-clone** on rebuild ([`hosts/macbook/projects.toml`](hosts/macbook/projects.toml)): only if the destination does **not** exist. Currently: `josephbb.github.io` enabled; `dotfiles` listed but disabled.
 
-In paper repos, cite with `\cite{key}` and either symlink `~/References/library.bib` or add a project-local `refs.bib` that `@`‑imports the shared library.
-
-## Fresh Mac
-
-1. Install Xcode CLT and [Determinate Nix](https://determinate.systems/).
-2. Clone this **private** repo to `~/dotfiles` (needs GitHub auth first: `gh auth login` or SSH keys).
-3. `sudo darwin-rebuild switch --flake ~/dotfiles#macbook`
-4. Sign into Apple / Proton; confirm `gh auth status`; import Keychron profile.
-
-The flake installs `gh` and git defaults so tooling is portable. **Account login and this private repo’s existence are one-time** — they cannot live in Nix (secrets / cloud identity). On a new machine you authenticate, clone, then rebuild.
-
-## Secrets
-
-`agenix` manages file-shaped secrets in this repo. They stay encrypted in git and decrypt only at activation/runtime on this machine.
-
-- Recipient list: [`secrets.nix`](secrets.nix) — public keys allowed to decrypt
-- First secret slot: [`secrets/openalex.env.age`](secrets/openalex.env.age)
-- Runtime path after `rebuild`: `"$OPENALEX_ENV_FILE"`
-- Decrypt identity: `~/.ssh/id_ed25519` (private key stays on the machine, never in git)
-
-### Edit a secret
+**Python template:**
 
 ```bash
-cd ~/dotfiles
-agenix -e secrets/openalex.env.age
+nix flake new -t ~/dotfiles#python ~/Projects/my-analysis
 ```
 
-Store it as shell exports, e.g.:
+See [Python projects](#python-projects) above.
+
+---
+
+## Optional: Ollama + Continue
+
+Flag: [`hosts/macbook/features.toml`](hosts/macbook/features.toml) · wiring: [`home/ollama.nix`](home/ollama.nix).
 
 ```bash
-export OPENALEX_API_KEY=replace-me
+feature-enable ollama && rebuild
+ollama-setup                 # start, pull defaults, prune retired
 ```
-
-Then apply and load only when needed:
-
-```bash
-rebuild
-openalex-load
-```
-
-### New machine / second machine
-
-The encrypted `.age` files travel with the repo. Decryption needs the matching SSH **private** key on the new machine.
-
-**Preferred (rekey — never move the private key):**
-
-1. On the new machine, generate an SSH key if needed (`ssh-keygen -t ed25519`).
-2. Add the new **public** key to [`secrets.nix`](secrets.nix) as another recipient (keep the old key if both machines should keep working).
-3. On a machine that can already decrypt (usually the old one):
-
-   ```bash
-   cd ~/dotfiles
-   agenix --rekey
-   ```
-
-4. Commit and push the re-encrypted `.age` files.
-5. On the new machine: clone (or pull), put `id_ed25519` in `~/.ssh/`, then `rebuild`.
-
-**Alternative (Proton Drive backup):** a copy of `id_ed25519` (+ `.pub`) lives in Proton Drive at:
-
-`~/Library/CloudStorage/ProtonDrive-jbakcoleman@proton.me-folder/SSHKeys/`
-
-On a new Mac after signing into Proton Drive:
-
-```bash
-mkdir -p ~/.ssh && chmod 700 ~/.ssh
-cp ~/Library/CloudStorage/ProtonDrive-*/SSHKeys/id_ed25519{,.pub} ~/.ssh/
-chmod 600 ~/.ssh/id_ed25519
-chmod 644 ~/.ssh/id_ed25519.pub
-ssh-add --apple-use-keychain ~/.ssh/id_ed25519
-```
-
-Then clone `~/dotfiles` and `rebuild`. Prefer rekey when you can; this backup is for wipe / single-machine recovery.
-
-To refresh the Proton Drive copy after rotating keys: `~/dotfiles/scripts/ssh-key-backup.sh`
-
-
-### Add another secret later
-
-1. Add an entry in [`secrets.nix`](secrets.nix), e.g. `"secrets/openai.env.age".publicKeys = [ jbakcoleman ];`
-2. Create it: `agenix -e secrets/openai.env.age`
-3. Declare it in [`home/secrets.nix`](home/secrets.nix) under `age.secrets` and wire any env vars / aliases you want
-4. `rebuild`
-
-## Auto-clone projects
-
-`hosts/macbook/projects.toml` can declare repos that should exist in `~/Projects` after `rebuild`.
-The activation script only clones when the destination folder does **not** already exist.
-
-Example:
-
-```toml
-[[projects]]
-name = "my-analysis"
-url = "git@github.com:your-org/my-analysis.git"
-dest = "my-analysis" # optional; defaults to name
-enabled = true       # optional; defaults to true
-```
-
-Notes:
-
-- Existing directories are never overwritten or pulled — active work is left alone.
-- Clones run as your user (not root) during activation.
-- Use SSH URLs if you already use SSH keys with GitHub.
-
-## Optional features (Ollama)
-
-Optional packages live behind flags in [`hosts/macbook/features.toml`](hosts/macbook/features.toml).
-Rebuild cannot interactively ask yes/no — use the helper instead:
-
-```bash
-feature status
-feature-enable ollama    # prompts, then writes enabled = true
-feature-disable ollama
-rebuild
-```
-
-When `[ollama] enabled = true`:
-
-- Homebrew installs **`ollama-app`** (not `curl | sh`)
-- VS Code gets the **Continue** extension
-- `~/.continue/config.json` points at local Ollama with:
 
 | Role | Model |
 |---|---|
@@ -241,118 +378,39 @@ When `[ollama] enabled = true`:
 | Faster coding alt | `qwen3-coder:30b-a3b-q8_0` |
 | Autocomplete | `qwen2.5-coder:7b-base-q4_K_M` |
 
-Tuned for **M5 Max / 128GB**. After rebuild:
+Tuned for **M5 Max / 128GB**. Continue config → `~/.continue/config.json`. `rebuild` does **not** pull models; use `ollama-setup`. Disable: `feature-disable ollama` → `rebuild` (models left on disk).
 
-```bash
-ollama-setup          # start Ollama if needed, pull defaults, remove retired models
-ollama-status         # binary / API / wanted vs installed
-ollama-pull-defaults  # pull only
-ollama-prune          # remove retired models only
-```
+---
 
-`ollama-setup` / `ollama-prune` also delete **retired** tags from older configs and wipe interrupted `*-partial-*` download blobs under `~/.ollama/models/blobs/` (these can leave 10–20G behind after cancelled pulls). Other models you pulled yourself are left alone. Already-downloaded wanted models are skipped by `ollama pull`.
+## Fresh Mac
 
+1. Xcode CLT + [Determinate Nix](https://determinate.systems/).
+2. Restore SSH key from Proton `SSHKeys/` (or generate new + rekey — [Secrets](#secrets-agenix)).
+3. `gh auth login` / ensure GitHub SSH works; clone this **private** repo to `~/dotfiles`.
+4. `sudo darwin-rebuild switch --flake ~/dotfiles#macbook`
+5. Sign into Apple / Proton; confirm `gh auth status`; import Keychron profile if needed.
+6. Open Zotero once, then `rebuild` again for plugins; `ollama-setup` if enabled.
 
-To turn it off later: `feature-disable ollama` → `rebuild` (models on disk are left alone).
+---
 
-## Data dirs
+## Raycast
 
-- `~/Projects` — git clones
-- `~/Datasets/{raw,derived,scratch}` — large / temporary / never-on-GitHub data
-- `~/References` — Zotero bib exports for LaTeX (`library.bib` via Better BibTeX)
-
-## Shell cheat sheet
-
-Aliases and tools declared in [`home/shell.nix`](home/shell.nix) (plus CLI from [`home/packages.nix`](home/packages.nix) and [`home/research.nix`](home/research.nix)). Use this as a learning list over the first weeks.
-
-### Aliases (ours)
-
-| Alias | Runs | What you get |
-|---|---|---|
-| `ls` | `eza` | Modern directory listing (colors, icons-capable) |
-| `ll` | `eza -l --git` | Long listing + git status column in repos |
-| `la` | `eza -la --git` | Same as `ll`, including hidden files |
-| `cat` | `bat` | File viewer with syntax highlighting / paging |
-| `g` | `git` | Shorthand for git |
-| `rebuild` | `scripts/rebuild.sh` | Apply flake + brew/nix GC + ollama prune |
-| `zot` | `open -a Zotero` | Open Zotero |
-| `feature` / `feature-enable` / `feature-disable` | `scripts/feature.sh …` | Opt in/out of optional features (prompts) |
-| `ollama-setup` | `scripts/ollama-setup.sh` | Start Ollama, clear partials, pull defaults, prune retired |
-| `ollama-pull-defaults` | `… pull` | Download configured Continue models only |
-| `ollama-prune` | `… prune` | Remove retired models + interrupted partial blobs |
-| `ollama-status` | `… status` | API / partials / wanted vs installed |
-
-### Related tools (no alias — type the name)
-
-| Command | Try this | Why |
-|---|---|---|
-| `eza --help` | `eza -T` | Tree view without a separate `tree` mental model |
-| `bat README.md` | `bat -A file` | Show non-printing chars |
-| `fd pattern` | `fd -e py` | Fast find (often nicer than `find`) |
-| `rg pattern` | `rg -n TODO` | Fast search in file contents |
-| `fzf` | see keybindings below | Fuzzy picker |
-| `z` / `zi` | `z proj` then `zi` | Jump to frecent dirs (zoxide) |
-| `lazygit` | run inside a repo | TUI for git status/commit/push |
-| `git diff` | any dirty repo | Paged diffs via delta |
-| `just` | `just --list` in a repo with `Justfile` | Task runner (simpler than Make) |
-| `watchexec -e py -- cmd` | re-run on save | Rebuild/re-analyse on file changes |
-| `sqlite3` / `duckdb` | open a `.csv` / `.db` | Quick tabular analysis |
-| `tldr cmd` | `tldr tar` | Short practical examples |
-| `uv` | `uv --help` | Python envs / packages |
-| `direnv` | needs `.envrc` in a project | Auto-load project env on `cd` |
-| `zot-bib` | run after BBT export | Show path and line count of `~/References/library.bib` |
-
-### Fuzzy find (fzf) keybindings
-
-After the flake is applied, in zsh:
-
-| Keys | Action |
-|---|---|
-| `Ctrl-R` | Fuzzy search command history |
-| `Ctrl-T` | Fuzzy find a file; paste path on the command line |
-| `Alt-C` | Fuzzy find a directory and `cd` into it |
-
-### Prompt & “magic” behavior
-
-- **Starship** — prompt shows path, git branch/status, and Python when it sees `pyproject.toml` / `uv.lock`
-- **Autosuggestions** — grey ghost text from history; accept with → (right arrow) or `End`
-- **Syntax highlighting** — commands turn color as you type (valid vs unknown)
-- **Oh My Zsh `git` plugin** — adds many short git aliases (`gst`, `gco`, `gd`, …). List them after apply with: `alias | rg '^g'`
-- **direnv** — when a project has `.envrc` (often `use flake`), entering the directory loads the Nix/dev env automatically
-
-### Ghostty + VS Code themes & font
-
-Ghostty stays on **Everforest Dark Hard** always. VS Code can still follow macOS light/dark with Everforest. Font: **IosevkaTerm Nerd Font**.
-
-VS Code extensions and settings are declared in [`home/vscode.nix`](home/vscode.nix)
-(Python, Jupyter, Ruff, LaTeX, Astro/MDX, Nix, direnv, …). The app itself stays a Homebrew cask
-for a stable `/Applications/Visual Studio Code.app` Dock path.
-
-## Raycast window management
-
-Configured in the Raycast UI (not in the flake). Current hotkeys:
+Configured in the Raycast UI (not in the flake):
 
 | Hotkey | Command |
 |---|---|
-| **⌃⌥← / →** | Left Half / Right Half |
-| **⌃⌥U / I / J / K** | Top-left / Top-right / Bottom-left / Bottom-right |
-| **⌃⌥↵** (Return) | Reasonable Maximize |
-| **⌃⌥⌫** (Delete) | Undo |
-| **⌘⇧S** | Snippets (open / search) |
+| **⌃⌥← / →** | Left / Right Half |
+| **⌃⌥U / I / J / K** | Corner quarters |
+| **⌃⌥↵** | Reasonable Maximize |
+| **⌃⌥⌫** | Undo |
+| **⌘⇧S** | Snippets |
 
-### Snippet ideas
-
-| Keyword | Expands to |
+| Snippet | Expands to |
 |---|---|
-| `;sig` | Email signature (Joe Bak-Coleman / UW / joebakcoleman.com) |
+| `;sig` | Email signature |
 | `;web` | `https://joebakcoleman.com` |
-| `;email` | Your preferred contact address |
-| `;zoom` | Standing Zoom/meeting link (if you have one) |
-| `;addr` | Mailing address for forms (if useful) |
-| `;thanks` | Short polite close (“Thanks, Joe”) |
-| `;avail` | “I’m free … — does that work?” scheduling line |
-| `;cite` | `Bak-Coleman et al.` or a go-to paper citation stub |
-| `;path` | `~/Projects/` or `~/Datasets/` |
+| `;email` | Contact address |
 | `;gh` | `https://github.com/josephbb/` |
-| `;arxiv` | `https://arxiv.org/abs/` (cursor after for the id) |
-| `;mu` / `;emdash` | `μ` / `—` (if you don’t use Raycast symbol search) |
+| `;arxiv` | `https://arxiv.org/abs/` |
+| `;path` | `~/Projects/` or `~/Datasets/` |
+| `;cite` / `;thanks` / `;avail` | Paper / mail stubs |

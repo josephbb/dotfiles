@@ -14,6 +14,7 @@
     quarto
     pandoc
     R
+    radianWrapper
 
     # LaTeX (large first download; full TeX Live for papers/ArXiv)
     texliveFull

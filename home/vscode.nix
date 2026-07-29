@@ -1,6 +1,7 @@
 {
   pkgs,
   config,
+  lib,
   ...
 }:
 let
@@ -79,24 +80,17 @@ in
           "**/.direnv" = true;
           "**/.venv" = true;
           "**/__pycache__" = true;
-          "**/.ruff_cache" = true;
           "**/.mypy_cache" = true;
+          "**/.ruff_cache" = true;
           "**/.pytest_cache" = true;
         };
-        "files.watcherExclude" = {
+        "search.exclude" = {
           "**/.direnv/**" = true;
           "**/.venv/**" = true;
-          "**/Datasets/**" = true;
         };
 
-        # Prefer project .venv / uv env when present; don't hardcode a global interpreter
-        "python.analysis.typeCheckingMode" = "standard";
-        "python.terminal.activateEnvironment" = true;
-
-        "notebook.formatOnSave.enabled" = true;
-        "notebook.codeActionsOnSave" = {
-          "notebook.source.fixAll" = "explicit";
-        };
+        "python.defaultInterpreterPath" = "python";
+        "python.analysis.typeCheckingMode" = "basic";
 
         "direnv.restart.automatic" = true;
         "nix.enableLanguageServer" = true;
@@ -153,4 +147,13 @@ in
       };
     };
   };
+
+  # VS Code marks HM-managed extensions obsolete when Marketplace installs collide.
+  # Clear that file on activate so Everforest (and friends) stay loadable.
+  home.activation.clearVscodeObsolete = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    obsolete="${config.home.homeDirectory}/.vscode/extensions/.obsolete"
+    if [ -f "$obsolete" ]; then
+      rm -f "$obsolete"
+    fi
+  '';
 }

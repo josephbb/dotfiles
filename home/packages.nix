@@ -9,13 +9,13 @@
     curl
     wget
     jq
+    yq
     fzf
     ripgrep
     fd
     bat
     eza
     tree
-    tmux
     htop
     btop
     lazygit
@@ -23,6 +23,11 @@
     tldr
     shellcheck
     sl
+
+    # Containers (Colima VM + Docker CLI; start with `colima start`)
+    colima
+    docker
+    docker-compose
 
     # Python / reproducibility
     uv
