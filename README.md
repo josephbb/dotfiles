@@ -378,7 +378,9 @@ ollama-setup                 # start, pull defaults, prune retired
 | Faster coding alt | `qwen3-coder:30b-a3b-q8_0` |
 | Autocomplete | `qwen2.5-coder:7b-base-q4_K_M` |
 
-Tuned for **M5 Max / 128GB**. Continue config → `~/.continue/config.json`. `rebuild` does **not** pull models; use `ollama-setup`. Disable: `feature-disable ollama` → `rebuild` (models left on disk).
+Tuned for **M5 Max / 128GB**. Continue v2 reads [`~/.continue/config.yaml`](home/ollama.nix) (not the old `config.json`). `rebuild` does **not** pull models; use `ollama-setup`. Disable: `feature-disable ollama` → `rebuild` (models left on disk).
+
+If Continue’s Models UI shows empty Chat/Autocomplete/Edit slots, reload the VS Code window after `rebuild` so it picks up the managed `config.yaml`.
 
 ---
 
