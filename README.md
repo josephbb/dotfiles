@@ -154,12 +154,13 @@ When `[ollama] enabled = true`:
 |---|---|
 | Agent | `llama3.1:70b-instruct-q4_K_M` |
 | Chat/Edit | `qwen2.5-coder:32b-instruct-q8_0` |
+| Chat/Edit | `qwen3-coder:30b-a3b-q8_0` |
 | Autocomplete | `qwen2.5-coder:7b-base-q4_K_M` |
 
 After rebuild:
 
 1. Open the **Ollama** app once (starts the local API on `http://localhost:11434`).
-2. Pull weights (~80GB total; fine on 128GB RAM): `ollama-pull-defaults`
+2. Pull weights (~110GB total; fine on 128GB RAM): `ollama-pull-defaults`
 3. Check: `ollama-status`
 4. In VS Code, open the Continue sidebar and pick the models above.
 

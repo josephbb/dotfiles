@@ -85,8 +85,9 @@ Enable Ollama?
   - Models (pull after rebuild with `ollama-pull-defaults`):
       llama3.1:70b-instruct-q4_K_M
       qwen2.5-coder:32b-instruct-q8_0
+      qwen3-coder:30b-a3b-q8_0
       qwen2.5-coder:7b-base-q4_K_M
-  - Needs ~80GB disk for those three weights; fine on 128GB RAM M-series.
+  - Needs ~110GB disk for those four weights; fine on 128GB RAM M-series.
 EOF
         ;;
       *)
