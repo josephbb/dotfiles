@@ -27,6 +27,15 @@ sudo darwin-rebuild switch --flake ~/dotfiles#macbook
 
 Or use the shell alias after the first successful switch: `rebuild`.
 
+`rebuild` is [`scripts/rebuild.sh`](scripts/rebuild.sh): apply the flake, then safe cleanup —
+
+1. `brew cleanup -s`
+2. `sudo nix-collect-garbage -d` (drops old Nix generations)
+3. `nix store optimise`
+4. `ollama prune` if Ollama is installed (retired tags + interrupted partial downloads only — **does not** pull models)
+
+For a full local-model refresh after enabling Ollama: `ollama-setup`.
+
 ## Layout
 
 ```text
@@ -152,17 +161,22 @@ When `[ollama] enabled = true`:
 
 | Role | Model |
 |---|---|
-| Agent | `llama3.1:70b-instruct-q4_K_M` |
-| Chat/Edit | `qwen2.5-coder:32b-instruct-q8_0` |
-| Chat/Edit | `qwen3-coder:30b-a3b-q8_0` |
+| Primary coding / agent | `qwen3-coder-next` |
+| General / agent | `llama3.3:70b-instruct-q4_K_M` |
+| Faster coding alt | `qwen3-coder:30b-a3b-q8_0` |
 | Autocomplete | `qwen2.5-coder:7b-base-q4_K_M` |
 
-After rebuild:
+Tuned for **M5 Max / 128GB**. After rebuild:
 
-1. Open the **Ollama** app once (starts the local API on `http://localhost:11434`).
-2. Pull weights (~110GB total; fine on 128GB RAM): `ollama-pull-defaults`
-3. Check: `ollama-status`
-4. In VS Code, open the Continue sidebar and pick the models above.
+```bash
+ollama-setup          # start Ollama if needed, pull defaults, remove retired models
+ollama-status         # binary / API / wanted vs installed
+ollama-pull-defaults  # pull only
+ollama-prune          # remove retired models only
+```
+
+`ollama-setup` / `ollama-prune` also delete **retired** tags from older configs and wipe interrupted `*-partial-*` download blobs under `~/.ollama/models/blobs/` (these can leave 10–20G behind after cancelled pulls). Other models you pulled yourself are left alone. Already-downloaded wanted models are skipped by `ollama pull`.
+
 
 To turn it off later: `feature-disable ollama` → `rebuild` (models on disk are left alone).
 
@@ -185,10 +199,13 @@ Aliases and tools declared in [`home/shell.nix`](home/shell.nix) (plus related C
 | `la` | `eza -la --git` | Same as `ll`, including hidden files |
 | `cat` | `bat` | File viewer with syntax highlighting / paging |
 | `g` | `git` | Shorthand for git |
-| `rebuild` | `sudo darwin-rebuild switch --flake ~/dotfiles#macbook` | Re-apply this flake after edits |
+| `rebuild` | `scripts/rebuild.sh` | Apply flake + brew/nix GC + ollama prune |
 | `zot` | `open -a Zotero` | Open Zotero |
 | `feature` / `feature-enable` / `feature-disable` | `scripts/feature.sh …` | Opt in/out of optional features (prompts) |
-| `ollama-pull-defaults` | `ollama pull …` (×3) | Download configured Continue models (when Ollama enabled) |
+| `ollama-setup` | `scripts/ollama-setup.sh` | Start Ollama, clear partials, pull defaults, prune retired |
+| `ollama-pull-defaults` | `… pull` | Download configured Continue models only |
+| `ollama-prune` | `… prune` | Remove retired models + interrupted partial blobs |
+| `ollama-status` | `… status` | API / partials / wanted vs installed |
 
 ### Related tools (no alias — type the name)
 
@@ -204,7 +221,6 @@ Aliases and tools declared in [`home/shell.nix`](home/shell.nix) (plus related C
 | `uv` | `uv --help` | Python envs / packages |
 | `direnv` | needs `.envrc` in a project | Auto-load project env on `cd` |
 | `zot-bib` | run after BBT export | Show path and line count of `~/References/library.bib` |
-| `ollama-status` | when Ollama enabled | API up/down + `ollama list` |
 
 ### Fuzzy find (fzf) keybindings
 

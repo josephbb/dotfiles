@@ -83,11 +83,11 @@ Enable Ollama?
   - Installs Homebrew cask: ollama-app
   - Adds VS Code Continue extension + ~/.continue/config.json
   - Models (pull after rebuild with `ollama-pull-defaults`):
-      llama3.1:70b-instruct-q4_K_M
-      qwen2.5-coder:32b-instruct-q8_0
+      qwen3-coder-next
+      llama3.3:70b-instruct-q4_K_M
       qwen3-coder:30b-a3b-q8_0
       qwen2.5-coder:7b-base-q4_K_M
-  - Needs ~110GB disk for those four weights; fine on 128GB RAM M-series.
+  - Tuned for M5 Max / 128GB unified memory.
 EOF
         ;;
       *)

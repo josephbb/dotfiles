@@ -24,7 +24,7 @@
       la = "eza -la --git";
       cat = "bat";
       g = "git";
-      rebuild = "sudo darwin-rebuild switch --flake ~/dotfiles#macbook";
+      rebuild = "${config.home.homeDirectory}/dotfiles/scripts/rebuild.sh";
       feature = "${config.home.homeDirectory}/dotfiles/scripts/feature.sh";
       feature-enable = "${config.home.homeDirectory}/dotfiles/scripts/feature.sh enable";
       feature-disable = "${config.home.homeDirectory}/dotfiles/scripts/feature.sh disable";
