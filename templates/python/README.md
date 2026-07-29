@@ -16,12 +16,21 @@ uv sync
 
 ```text
 analysis.ipynb
+palettes.toml         # named plot color palettes
 data/                 # inputs (gitignored contents)
 output/               # figures, tables, traces (gitignored contents)
-src/                  # your modules
+src/                  # your modules (includes palettes.py)
 scripts/install_kernel.sh
 flake.nix             # dev shell + native libs for SciPy/PyMC
 pyproject.toml        # numpy, scipy, pandas, polars, pymc[nutpie], arviz, …
+```
+
+Load a palette in a notebook:
+
+```python
+from src.palettes import load_palette
+p = load_palette("hinoki_forest")
+# p.ember_clay, p.forest_shade, …
 ```
 
 ## Stack

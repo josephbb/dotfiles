@@ -22,11 +22,12 @@
     let
       system = "aarch64-darwin";
       username = "jbakcoleman";
+      features = builtins.fromTOML (builtins.readFile ./hosts/macbook/features.toml);
     in
     {
       darwinConfigurations.macbook = nix-darwin.lib.darwinSystem {
         inherit system;
-        specialArgs = { inherit username; };
+        specialArgs = { inherit username features; };
         modules = [
           ./hosts/macbook
           home-manager.darwinModules.home-manager
@@ -35,7 +36,7 @@
             home-manager.useUserPackages = true;
             # Back up preexisting dotfiles instead of failing the switch.
             home-manager.backupFileExtension = "backup";
-            home-manager.extraSpecialArgs = { inherit username; };
+            home-manager.extraSpecialArgs = { inherit username features; };
             home-manager.users.${username} = import ./home;
           }
         ];

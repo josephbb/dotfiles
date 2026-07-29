@@ -1,0 +1,10 @@
+# Optional machine features. Toggle with `feature-enable` / `feature-disable`, then `rebuild`.
+# Nix cannot interactively ask during rebuild — these flags are the source of truth.
+
+[ollama]
+enabled = true
+# Pull these after install (or run `ollama-pull-defaults`):
+#   llama3.1:70b-instruct-q4_K_M
+#   qwen2.5-coder:32b-instruct-q8_0
+#   qwen3-coder:30b-a3b-q8_0
+#   qwen2.5-coder:7b-base-q4_K_M

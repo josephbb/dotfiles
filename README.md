@@ -31,10 +31,11 @@ Or use the shell alias after the first successful switch: `rebuild`.
 
 ```text
 flake.nix              # inputs + darwinConfigurations.macbook + templates
-hosts/macbook/         # nix-darwin: Homebrew casks, fonts, macOS defaults
-home/                  # home-manager: CLI packages, zsh, starship, git, firefox, vscode, zotero
+hosts/macbook/         # nix-darwin: Homebrew casks, fonts, macOS defaults, features.toml
+home/                  # home-manager: CLI packages, zsh, starship, git, firefox, vscode, zotero, ollama
 keychron/              # exported keyboard profiles (backup only)
 templates/python/      # nix flake new -t ~/dotfiles#python …
+scripts/               # helpers (feature enable/disable, …)
 ```
 
 ## New research project
@@ -47,7 +48,7 @@ uv sync
 ./scripts/install_kernel.sh
 ```
 
-Barebones layout: `data/`, `output/`, `src/`, `analysis.ipynb`, nix+uv (numpy/scipy/pandas/polars/pymc[nutpie]/arviz/…). See [`templates/python`](templates/python).
+Barebones layout: `data/`, `output/`, `src/`, `analysis.ipynb`, `palettes.toml` (named plot colors via `src.palettes`), nix+uv (numpy/scipy/pandas/polars/pymc[nutpie]/arviz/…). See [`templates/python`](templates/python).
 
 ## LaTeX
 
@@ -131,6 +132,39 @@ Notes:
 - Clones run as your user (not root) during activation.
 - Use SSH URLs if you already use SSH keys with GitHub.
 
+## Optional features (Ollama)
+
+Optional packages live behind flags in [`hosts/macbook/features.toml`](hosts/macbook/features.toml).
+Rebuild cannot interactively ask yes/no — use the helper instead:
+
+```bash
+feature status
+feature-enable ollama    # prompts, then writes enabled = true
+feature-disable ollama
+rebuild
+```
+
+When `[ollama] enabled = true`:
+
+- Homebrew installs **`ollama-app`** (not `curl | sh`)
+- VS Code gets the **Continue** extension
+- `~/.continue/config.json` points at local Ollama with:
+
+| Role | Model |
+|---|---|
+| Agent | `llama3.1:70b-instruct-q4_K_M` |
+| Chat/Edit | `qwen2.5-coder:32b-instruct-q8_0` |
+| Autocomplete | `qwen2.5-coder:7b-base-q4_K_M` |
+
+After rebuild:
+
+1. Open the **Ollama** app once (starts the local API on `http://localhost:11434`).
+2. Pull weights (~80GB total; fine on 128GB RAM): `ollama-pull-defaults`
+3. Check: `ollama-status`
+4. In VS Code, open the Continue sidebar and pick the models above.
+
+To turn it off later: `feature-disable ollama` → `rebuild` (models on disk are left alone).
+
 ## Data dirs
 
 - `~/Projects` — git clones
@@ -152,6 +186,8 @@ Aliases and tools declared in [`home/shell.nix`](home/shell.nix) (plus related C
 | `g` | `git` | Shorthand for git |
 | `rebuild` | `sudo darwin-rebuild switch --flake ~/dotfiles#macbook` | Re-apply this flake after edits |
 | `zot` | `open -a Zotero` | Open Zotero |
+| `feature` / `feature-enable` / `feature-disable` | `scripts/feature.sh …` | Opt in/out of optional features (prompts) |
+| `ollama-pull-defaults` | `ollama pull …` (×3) | Download configured Continue models (when Ollama enabled) |
 
 ### Related tools (no alias — type the name)
 
@@ -167,6 +203,7 @@ Aliases and tools declared in [`home/shell.nix`](home/shell.nix) (plus related C
 | `uv` | `uv --help` | Python envs / packages |
 | `direnv` | needs `.envrc` in a project | Auto-load project env on `cd` |
 | `zot-bib` | run after BBT export | Show path and line count of `~/References/library.bib` |
+| `ollama-status` | when Ollama enabled | API up/down + `ollama list` |
 
 ### Fuzzy find (fzf) keybindings
 

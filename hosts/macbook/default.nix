@@ -2,6 +2,7 @@
   lib,
   pkgs,
   username,
+  features,
   ...
 }:
 let
@@ -22,6 +23,7 @@ let
       fi
     ''
   ) enabledProjects;
+  ollamaEnabled = features.ollama.enabled or false;
 in
 {
   # Determinate Nix manages the nix installation; don't let nix-darwin clobber it.
@@ -50,18 +52,23 @@ in
     brews = [
       "defaultbrowser" # CLI used to set the default browser
     ];
-    casks = [
-      "ghostty"
-      "raycast"
-      "visual-studio-code"
-      "firefox"
-      "proton-drive"
-      "zotero"
-      "rstudio"
-      "zoom"
-      "signal"
-      "tidal"
-    ];
+    casks =
+      [
+        "ghostty"
+        "raycast"
+        "visual-studio-code"
+        "firefox"
+        "proton-drive"
+        "zotero"
+        "rstudio"
+        "zoom"
+        "signal"
+        "tidal"
+      ]
+      ++ lib.optionals ollamaEnabled [
+        # Prefer brew cask over curl|sh; ships app + CLI for local models.
+        "ollama-app"
+      ];
   };
 
   # Fonts available system-wide for Ghostty / editors.

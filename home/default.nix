@@ -7,6 +7,7 @@
     ./firefox.nix
     ./vscode.nix
     ./zotero.nix
+    ./ollama.nix
   ];
 
   home.username = username;
