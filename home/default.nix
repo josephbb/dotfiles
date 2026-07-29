@@ -2,6 +2,8 @@
 {
   imports = [
     ./packages.nix
+    ./research.nix
+    ./secrets.nix
     ./shell.nix
     ./git.nix
     ./firefox.nix

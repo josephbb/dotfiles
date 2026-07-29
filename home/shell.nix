@@ -71,6 +71,12 @@
     enableZshIntegration = true;
   };
 
+  # Jump to frecent directories: `z projects`, `zi` for interactive.
+  programs.zoxide = {
+    enable = true;
+    enableZshIntegration = true;
+  };
+
   # Ghostty config (app itself is a Homebrew cask).
   # Always dark — does not follow macOS appearance.
   xdg.configFile."ghostty/config".text = ''

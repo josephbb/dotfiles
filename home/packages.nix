@@ -1,5 +1,6 @@
 { pkgs, ... }:
 {
+  # General shell/dev CLI. Research stack lives in research.nix.
   home.packages = with pkgs; [
     # Core CLI
     git
@@ -27,14 +28,6 @@
     uv
     direnv
     nix-direnv
-
-    # Docs / R ecosystem (CLI)
-    quarto
-    pandoc
-    R
-
-    # LaTeX (large first download; full TeX Live for papers/ArXiv)
-    texliveFull
 
     # Nix ergonomics
     nixfmt

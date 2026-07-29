@@ -18,6 +18,7 @@ A single private repo is the source of truth for the machine. Edit config → `r
 - **Templates as muscle memory** — `nix flake new -t ~/dotfiles#python …` spins a barebones analysis repo (data/output/src, notebook, kernel script) instead of reinventing layout each paper.
 
 What this does *not* try to own: cloud account state, Keychron firmware (JSON backup only), or full macOS visual theming beyond Dock/defaults.
+API keys can still live here safely as encrypted `agenix` files.
 
 ## Apply
 
@@ -41,7 +42,8 @@ For a full local-model refresh after enabling Ollama: `ollama-setup`.
 ```text
 flake.nix              # inputs + darwinConfigurations.macbook + templates
 hosts/macbook/         # nix-darwin: Homebrew casks, fonts, macOS defaults, features.toml
-home/                  # home-manager: CLI packages, zsh, starship, git, firefox, vscode, zotero, ollama
+home/                  # home-manager: CLI, research tools, zsh, git, firefox, vscode, zotero, ollama
+secrets/               # agenix-encrypted secrets + recipients
 keychron/              # exported keyboard profiles (backup only)
 templates/python/      # nix flake new -t ~/dotfiles#python …
 scripts/               # helpers (feature enable/disable, …)
@@ -120,6 +122,79 @@ In paper repos, cite with `\cite{key}` and either symlink `~/References/library.
 
 The flake installs `gh` and git defaults so tooling is portable. **Account login and this private repo’s existence are one-time** — they cannot live in Nix (secrets / cloud identity). On a new machine you authenticate, clone, then rebuild.
 
+## Secrets
+
+`agenix` manages file-shaped secrets in this repo. They stay encrypted in git and decrypt only at activation/runtime on this machine.
+
+- Recipient list: [`secrets.nix`](secrets.nix) — public keys allowed to decrypt
+- First secret slot: [`secrets/openalex.env.age`](secrets/openalex.env.age)
+- Runtime path after `rebuild`: `"$OPENALEX_ENV_FILE"`
+- Decrypt identity: `~/.ssh/id_ed25519` (private key stays on the machine, never in git)
+
+### Edit a secret
+
+```bash
+cd ~/dotfiles
+agenix -e secrets/openalex.env.age
+```
+
+Store it as shell exports, e.g.:
+
+```bash
+export OPENALEX_API_KEY=replace-me
+```
+
+Then apply and load only when needed:
+
+```bash
+rebuild
+openalex-load
+```
+
+### New machine / second machine
+
+The encrypted `.age` files travel with the repo. Decryption needs the matching SSH **private** key on the new machine.
+
+**Preferred (rekey — never move the private key):**
+
+1. On the new machine, generate an SSH key if needed (`ssh-keygen -t ed25519`).
+2. Add the new **public** key to [`secrets.nix`](secrets.nix) as another recipient (keep the old key if both machines should keep working).
+3. On a machine that can already decrypt (usually the old one):
+
+   ```bash
+   cd ~/dotfiles
+   agenix --rekey
+   ```
+
+4. Commit and push the re-encrypted `.age` files.
+5. On the new machine: clone (or pull), put `id_ed25519` in `~/.ssh/`, then `rebuild`.
+
+**Alternative (Proton Drive backup):** a copy of `id_ed25519` (+ `.pub`) lives in Proton Drive at:
+
+`~/Library/CloudStorage/ProtonDrive-jbakcoleman@proton.me-folder/SSHKeys/`
+
+On a new Mac after signing into Proton Drive:
+
+```bash
+mkdir -p ~/.ssh && chmod 700 ~/.ssh
+cp ~/Library/CloudStorage/ProtonDrive-*/SSHKeys/id_ed25519{,.pub} ~/.ssh/
+chmod 600 ~/.ssh/id_ed25519
+chmod 644 ~/.ssh/id_ed25519.pub
+ssh-add --apple-use-keychain ~/.ssh/id_ed25519
+```
+
+Then clone `~/dotfiles` and `rebuild`. Prefer rekey when you can; this backup is for wipe / single-machine recovery.
+
+To refresh the Proton Drive copy after rotating keys: `~/dotfiles/scripts/ssh-key-backup.sh`
+
+
+### Add another secret later
+
+1. Add an entry in [`secrets.nix`](secrets.nix), e.g. `"secrets/openai.env.age".publicKeys = [ jbakcoleman ];`
+2. Create it: `agenix -e secrets/openai.env.age`
+3. Declare it in [`home/secrets.nix`](home/secrets.nix) under `age.secrets` and wire any env vars / aliases you want
+4. `rebuild`
+
 ## Auto-clone projects
 
 `hosts/macbook/projects.toml` can declare repos that should exist in `~/Projects` after `rebuild`.
@@ -188,7 +263,7 @@ To turn it off later: `feature-disable ollama` → `rebuild` (models on disk are
 
 ## Shell cheat sheet
 
-Aliases and tools declared in [`home/shell.nix`](home/shell.nix) (plus related CLI from [`home/packages.nix`](home/packages.nix)). Use this as a learning list over the first weeks.
+Aliases and tools declared in [`home/shell.nix`](home/shell.nix) (plus CLI from [`home/packages.nix`](home/packages.nix) and [`home/research.nix`](home/research.nix)). Use this as a learning list over the first weeks.
 
 ### Aliases (ours)
 
@@ -216,7 +291,12 @@ Aliases and tools declared in [`home/shell.nix`](home/shell.nix) (plus related C
 | `fd pattern` | `fd -e py` | Fast find (often nicer than `find`) |
 | `rg pattern` | `rg -n TODO` | Fast search in file contents |
 | `fzf` | see keybindings below | Fuzzy picker |
+| `z` / `zi` | `z proj` then `zi` | Jump to frecent dirs (zoxide) |
 | `lazygit` | run inside a repo | TUI for git status/commit/push |
+| `git diff` | any dirty repo | Paged diffs via delta |
+| `just` | `just --list` in a repo with `Justfile` | Task runner (simpler than Make) |
+| `watchexec -e py -- cmd` | re-run on save | Rebuild/re-analyse on file changes |
+| `sqlite3` / `duckdb` | open a `.csv` / `.db` | Quick tabular analysis |
 | `tldr cmd` | `tldr tar` | Short practical examples |
 | `uv` | `uv --help` | Python envs / packages |
 | `direnv` | needs `.envrc` in a project | Auto-load project env on `cd` |

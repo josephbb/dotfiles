@@ -9,6 +9,9 @@
 
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
+
+    agenix.url = "github:ryantm/agenix";
+    agenix.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
@@ -17,6 +20,7 @@
       nixpkgs,
       nix-darwin,
       home-manager,
+      agenix,
       ...
     }:
     let
@@ -34,9 +38,12 @@
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
+            home-manager.sharedModules = [ agenix.homeManagerModules.default ];
             # Back up preexisting dotfiles instead of failing the switch.
             home-manager.backupFileExtension = "backup";
-            home-manager.extraSpecialArgs = { inherit username features; };
+            home-manager.extraSpecialArgs = {
+              inherit username features agenix;
+            };
             home-manager.users.${username} = import ./home;
           }
         ];
