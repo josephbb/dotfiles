@@ -5,11 +5,8 @@
   ...
 }:
 let
-  everforest = pkgs.vscode-utils.extensionFromVscodeMarketplace {
-    name = "everforest";
-    publisher = "sainnhe";
-    version = "0.3.0";
-    sha256 = "sha256-nZirzVvM160ZTpBLTimL2X35sIGy5j2LQOok7a2Yc7U=";
+  editorSettings = import ./editor-settings.nix {
+    homeDirectory = config.home.homeDirectory;
   };
 in
 {
@@ -24,132 +21,47 @@ in
       enableExtensionUpdateCheck = false;
       enableUpdateCheck = false;
 
-      extensions =
-        (with pkgs.vscode-extensions; [
-          # Python
-          ms-python.python
-          ms-python.vscode-pylance
-          ms-python.debugpy
-          ms-toolsai.jupyter
-          charliermarsh.ruff
+      extensions = with pkgs.vscode-extensions; [
+        # Python
+        ms-python.python
+        ms-python.vscode-pylance
+        ms-python.debugpy
+        ms-toolsai.jupyter
+        charliermarsh.ruff
 
-          # Reproducibility / config
-          mkhl.direnv
-          jnoortheen.nix-ide
-          tamasfe.even-better-toml
-          redhat.vscode-yaml
+        # Reproducibility / config
+        mkhl.direnv
+        jnoortheen.nix-ide
+        tamasfe.even-better-toml
+        redhat.vscode-yaml
 
-          # Git / docs
-          github.vscode-pull-request-github
-          yzhang.markdown-all-in-one
+        # Git / docs
+        github.vscode-pull-request-github
+        donjayamanne.githistory
+        yzhang.markdown-all-in-one
 
-          # LaTeX (papers: ArXiV.tex, latexmk, bib)
-          james-yu.latex-workshop
+        # LaTeX (papers: ArXiV.tex, latexmk, bib)
+        james-yu.latex-workshop
 
-          # Astro blog (josephbb.github.io): Astro + MDX + Prettier
-          astro-build.astro-vscode
-          unifiedjs.vscode-mdx
-          esbenp.prettier-vscode
+        # Astro blog (josephbb.github.io): Astro + MDX + Prettier
+        astro-build.astro-vscode
+        unifiedjs.vscode-mdx
+        esbenp.prettier-vscode
 
-          # Prose / papers
-          streetsidesoftware.code-spell-checker
-          valentjn.vscode-ltex
-        ])
-        ++ [ everforest ];
+        # Prose / papers
+        streetsidesoftware.code-spell-checker
+        valentjn.vscode-ltex
 
-      userSettings = {
-        # Match Ghostty: Everforest + macOS light/dark
-        "window.autoDetectColorScheme" = true;
-        "workbench.preferredDarkColorTheme" = "Everforest Dark";
-        "workbench.preferredLightColorTheme" = "Everforest Light";
-        "everforest.darkContrast" = "hard";
-        "everforest.lightContrast" = "medium";
-        "everforest.darkItalic" = true;
-        "everforest.lightItalic" = true;
+        # Theme (nixpkgs — avoids Marketplace fetch / .obsolete fights)
+        sainnhe.gruvbox-material
+      ];
 
-        "editor.fontFamily" = "IosevkaTerm Nerd Font, Menlo, Monaco, 'Courier New', monospace";
-        "editor.fontSize" = 13;
-        "editor.fontLigatures" = true;
-        "editor.formatOnSave" = true;
-        "editor.minimap.enabled" = false;
-        "editor.rulers" = [ 88 ];
-
-        "files.trimTrailingWhitespace" = true;
-        "files.insertFinalNewline" = true;
-        "files.exclude" = {
-          "**/.direnv" = true;
-          "**/.venv" = true;
-          "**/__pycache__" = true;
-          "**/.mypy_cache" = true;
-          "**/.ruff_cache" = true;
-          "**/.pytest_cache" = true;
-        };
-        "search.exclude" = {
-          "**/.direnv/**" = true;
-          "**/.venv/**" = true;
-        };
-
-        "python.defaultInterpreterPath" = "python";
-        "python.analysis.typeCheckingMode" = "basic";
-
-        "direnv.restart.automatic" = true;
-        "nix.enableLanguageServer" = true;
-        "nix.serverPath" = "nil";
-
-        # LaTeX Workshop → latexmk (matches your paper repos)
-        "latex-workshop.latex.tools" = [
-          {
-            name = "latexmk";
-            command = "latexmk";
-            args = [
-              "-pdf"
-              "-interaction=nonstopmode"
-              "-synctex=1"
-              "-file-line-error"
-              "%DOC%"
-            ];
-          }
-        ];
-        "latex-workshop.latex.recipes" = [
-          {
-            name = "latexmk";
-            tools = [ "latexmk" ];
-          }
-        ];
-        "latex-workshop.view.pdf.viewer" = "tab";
-        # Shared bib export from Zotero (Better BibTeX → ~/References/library.bib)
-        "latex-workshop.bibtex.bibDirs" = [
-          "${config.home.homeDirectory}/References"
-        ];
-
-        # Prettier for the Astro blog (and MD/MDX); Ruff stays for Python
-        "editor.defaultFormatter" = "esbenp.prettier-vscode";
-        "[astro]" = {
-          "editor.defaultFormatter" = "esbenp.prettier-vscode";
-        };
-        "[markdown]" = {
-          "editor.defaultFormatter" = "esbenp.prettier-vscode";
-        };
-        "[mdx]" = {
-          "editor.defaultFormatter" = "esbenp.prettier-vscode";
-        };
-        "[python]" = {
-          "editor.defaultFormatter" = "charliermarsh.ruff";
-          "editor.formatOnSave" = true;
-          "editor.codeActionsOnSave" = {
-            "source.fixAll.ruff" = "explicit";
-            "source.organizeImports.ruff" = "explicit";
-          };
-        };
-
-        "workbench.startupEditor" = "none";
-        "explorer.confirmDelete" = false;
-      };
+      userSettings = editorSettings;
     };
   };
 
   # VS Code marks HM-managed extensions obsolete when Marketplace installs collide.
-  # Clear that file on activate so Everforest (and friends) stay loadable.
+  # Clear that file on activate so themes (and friends) stay loadable.
   home.activation.clearVscodeObsolete = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     obsolete="${config.home.homeDirectory}/.vscode/extensions/.obsolete"
     if [ -f "$obsolete" ]; then

@@ -21,7 +21,7 @@ Declarative macOS setup for Joe’s machine via **[nix-darwin](https://github.co
   - [fzf](#fzf)
   - [tmux](#tmux)
   - [Docker / Colima](#docker--colima)
-  - [Python projects](#python-projects)
+  - [Project templates](#project-templates)
   - [R / Quarto / LaTeX](#r--quarto--latex)
   - [Secrets (OpenAlex)](#secrets-openalex)
 - [Data directories](#data-directories)
@@ -29,6 +29,7 @@ Declarative macOS setup for Joe’s machine via **[nix-darwin](https://github.co
 - [Zotero](#zotero)
 - [Projects & templates](#projects--templates)
 - [Optional: Ollama + Continue](#optional-ollama--continue)
+- [Optional: Cursor](#optional-cursor)
 - [Fresh Mac](#fresh-mac)
 - [Raycast](#raycast)
 
@@ -45,7 +46,7 @@ Declarative macOS setup for Joe’s machine via **[nix-darwin](https://github.co
 - **Research-shaped** — `~/Projects`, Proton-backed `~/Datasets/{raw,derived}`, local `scratch`, TeX Live, Zotero → bib, no conda.
 - **Secrets stay encrypted** — API keys via [agenix](https://github.com/ryantm/agenix); Apple/Proton/`gh auth` stay interactive.
 
-What this does *not* own: cloud account state, Keychron firmware (JSON backup only), Cursor settings (separate from VS Code), or full macOS visual theming beyond Dock/defaults.
+What this does *not* own: cloud account state, Keychron firmware (JSON backup only), or full macOS visual theming beyond Dock/defaults. Cursor is optional via [`features.toml`](hosts/macbook/features.toml) (mirrors VS Code when enabled).
 
 ---
 
@@ -63,7 +64,7 @@ sudo darwin-rebuild switch --flake ~/dotfiles#macbook
 
 [`scripts/rebuild.sh`](scripts/rebuild.sh) then runs safe cleanup: `brew cleanup`, nix GC, store optimise, and `ollama prune` if Ollama is present (**does not** pull models).
 
-Toggle optional features: `feature status` · `feature-enable ollama` · `feature-disable ollama` ([`scripts/feature.sh`](scripts/feature.sh)).
+Toggle optional features: `feature status` · `feature-enable ollama` · `feature-enable cursor` ([`scripts/feature.sh`](scripts/feature.sh)).
 
 ---
 
@@ -78,10 +79,11 @@ home/                     # home-manager modules
   secrets.nix             # agenix wiring
   shell.nix               # zsh, starship, fzf, zoxide, tmux, Ghostty
   git.nix                 # git + gh + delta
-  vscode.nix / firefox.nix / zotero.nix / ollama.nix
+  vscode.nix / cursor.nix / firefox.nix / zotero.nix / ollama.nix
+  editor-settings.nix     # shared VS Code ↔ Cursor settings
 secrets/                  # encrypted .age files
 secrets.nix               # agenix recipients (SSH public keys)
-templates/python/         # nix flake new -t ~/dotfiles#python …
+templates/                # scratch · bayes · openalex · r — see templates/README.md
 scripts/                  # rebuild, feature, ollama-setup, ssh-key-backup
 keychron/                 # keyboard profile backup only
 ```
@@ -101,16 +103,23 @@ Declared in [`hosts/macbook/default.nix`](hosts/macbook/default.nix):
 | [Ghostty](https://ghostty.org/) | Terminal |
 | [Raycast](https://www.raycast.com/) | Launcher / window mgmt (hotkeys set in UI) |
 | [Visual Studio Code](https://code.visualstudio.com/) | Primary editor (extensions via HM) |
-| [Firefox](https://www.mozilla.org/firefox/) | Browser + Zotero Connector |
+| [Cursor](https://www.cursor.com/) | AI editor — **only if** `[cursor] enabled` in [`features.toml`](hosts/macbook/features.toml) |
+| [Firefox](https://www.mozilla.org/firefox/) | Default browser + Zotero Connector |
+| [Google Chrome](https://www.google.com/chrome/) | Secondary browser |
 | [Proton Drive](https://proton.me/drive) | Sync (Datasets raw/derived, SSH key backup) |
+| [Proton VPN](https://protonvpn.com/) | VPN |
+| [Proton Pass](https://proton.me/pass) | Password manager |
+| [Obsidian](https://obsidian.md/) | Notes / PKM |
 | [Zotero](https://www.zotero.org/) | Reference manager |
 | [RStudio](https://posit.co/products/open-source/rstudio/) | R IDE |
-| Zoom, Signal, TIDAL | Meetings / chat / music |
-| Ollama | Local LLMs — **only if** `[ollama] enabled` in [`features.toml`](hosts/macbook/features.toml) |
+| [Zoom](https://zoom.us/) | Meetings |
+| Signal, TIDAL | Chat / music |
+| [AnkerWork](https://us.ankerwork.com/) | Webcam / mic accessory software |
+| Ollama | Local LLMs — **only if** `[ollama] enabled` |
 
 ### Dock
 
-Pinned (rebuild replaces the list): Firefox, Ghostty, VS Code, RStudio, Messages, Signal, Zoom, TIDAL, System Settings.
+Pinned (rebuild replaces the list): Firefox, Mail, Calendar, Ghostty, VS Code, Cursor *(if enabled)*, Obsidian, RStudio, Messages, Signal, Zoom, TIDAL, System Settings.
 
 ### Shell & CLI
 
@@ -143,27 +152,27 @@ From [`home/research.nix`](home/research.nix):
 
 ### Editors
 
-**VS Code** — app via brew; settings/extensions in [`home/vscode.nix`](home/vscode.nix):
+**VS Code** — app via brew; settings/extensions in [`home/vscode.nix`](home/vscode.nix) (settings shared via [`home/editor-settings.nix`](home/editor-settings.nix)):
 
 | Extension area | Packages |
 |---|---|
 | Python | Python, Pylance, debugpy, Jupyter, Ruff |
 | Config / Nix | direnv, nix-ide, even-better-toml, vscode-yaml |
-| Docs / git | PR GitHub, Markdown All in One |
+| Docs / git | PR GitHub, Git History, Markdown All in One |
 | Papers | LaTeX Workshop, Code Spell Checker, LTeX |
 | Blog | Astro, MDX, Prettier |
-| Theme | Everforest (follows macOS light/dark) |
+| Theme | Gruvbox Material Dark (always) |
 
 **RStudio** — brew cask; uses nixpkgs `R` on PATH. Prefer `radian` in the terminal.
 
-**Cursor** — not managed by this flake (separate settings/extensions).
+**Cursor** — optional (`feature-enable cursor`). When on: brew cask + Dock pin; settings and the same research/blog extension stack as VS Code ([`home/cursor.nix`](home/cursor.nix)). Skips Continue (Cursor’s own agent).
 
 ### Fonts & themes
 
 | Where | Theme / font |
 |---|---|
-| Ghostty | Everforest Dark Hard · **IosevkaTerm Nerd Font** 14 |
-| VS Code | Everforest Dark/Light via `autoDetectColorScheme` · same font family 13 |
+| Ghostty | Gruvbox Material Dark · **IosevkaTerm Nerd Font** 14 |
+| VS Code / Cursor | Gruvbox Material Dark (hard contrast) · same font family 13 |
 | System font | `nerd-fonts.iosevka-term` via nix-darwin |
 
 ---
@@ -180,7 +189,7 @@ Declared in [`home/shell.nix`](home/shell.nix) (plus Zotero / secrets / Ollama m
 | `cat` | `bat` |
 | `g` | `git` |
 | `rebuild` | Apply flake + cleanup ([`scripts/rebuild.sh`](scripts/rebuild.sh)) |
-| `feature` / `feature-enable` / `feature-disable` | Optional features ([`features.toml`](hosts/macbook/features.toml)) |
+| `feature` / `feature-enable` / `feature-disable` | Optional features (`ollama`, `cursor`) |
 | `colima-start` | Start Docker VM (4 CPU / 8 GB / 60 GB disk) |
 | `zot` / `zot-bib` / `zot-plugins` | Zotero helpers |
 | `openalex-load` / `openalex-show-path` | Load / show OpenAlex env file |
@@ -258,19 +267,18 @@ docker compose up
 colima stop
 ```
 
-### Python projects
+### Project templates
+
+Full guide: [`templates/README.md`](templates/README.md).
 
 ```bash
-nix flake new -t ~/dotfiles#python ~/Projects/my-analysis
-cd ~/Projects/my-analysis
-direnv allow               # loads flake env on cd (or: nix develop)
-uv sync
-./scripts/install_kernel.sh
+nix flake new -t ~/dotfiles#scratch  ~/Projects/blog-note
+nix flake new -t ~/dotfiles#bayes    ~/Projects/my-model
+nix flake new -t ~/dotfiles#openalex ~/Projects/oa-industry-ties
+nix flake new -t ~/dotfiles#r        ~/Projects/tidyverse-scratch
 ```
 
-Layout: `data/`, `output/`, `src/`, `analysis.ipynb`, `palettes.toml`. Stack via uv: numpy/scipy/pandas/polars/pymc/arviz/…. See [`templates/python`](templates/python).
-
-**direnv:** if a project has `.envrc` with `use flake`, `cd` auto-loads the env after one `direnv allow`. You don’t need `nix develop` every time.
+`#scratch` is the **default**. Former `#python` → **`#bayes`**. After create: `direnv allow` + `uv sync` (or `renv::init()` for R).
 
 ### R / Quarto / LaTeX
 
@@ -281,6 +289,7 @@ Layout: `data/`, `output/`, `src/`, `analysis.ipynb`, `palettes.toml`. Stack via
 | `quarto preview` | Quarto projects |
 | `latexmk -pdf paper.tex` | TeX Live via `texliveFull` |
 | RStudio | GUI; Dock pin |
+| `nix flake new -t ~/dotfiles#r …` | Project stub with renv |
 
 Bib: LaTeX Workshop reads `~/References/` ([Zotero](#zotero)).
 
@@ -302,10 +311,25 @@ echo "$OPENALEX_API_KEY"             # should be set
 | `~/Projects` | Local | Git clones |
 | `~/Datasets/raw` | → Proton Drive `Datasets/raw` | Immutable inputs (synced) |
 | `~/Datasets/derived` | → Proton Drive `Datasets/derived` | Processed outputs (synced) |
-| `~/Datasets/scratch` | Local only | Temp / never sync |
+| `~/Datasets/scratch` | Local only | Temp / wipeable cache (never sync) |
 | `~/References` | Local | Zotero bib exports (`library.bib`) |
 
 Symlinks keep `~/Datasets/raw` and `~/Datasets/derived` stable. If Proton Drive isn’t signed in, activation uses local folders until the next `rebuild` after the client appears.
+
+**OpenAlex layout** ([`templates/openalex`](templates/openalex)): JSONL pages land in **scratch** as a wipeable cache; optionally promote to **raw** for provenance; compile to **Parquet** in **derived** (analysis source of truth). Optional `catalog.duckdb` is a rebuildable SQL view over those Parquets—not a server DB. Corpus filters use the same `[query.*]` TOML shape as LLMDiscourse (`years`, `works`, `journals`, `search`, …).
+
+| Stage | Path | Role |
+|---|---|---|
+| Cache | `~/Datasets/scratch/<slug>/openalex/` | JSONL; safe to delete / re-fetch |
+| Raw (optional) | `~/Datasets/raw/<slug>/openalex/` | Frozen harvest |
+| Derived | `~/Datasets/derived/<slug>/openalex/` | `*.parquet` (+ optional DuckDB) |
+
+```bash
+openalex-load
+uv run python scripts/fetch.py              # → scratch
+uv run python scripts/fetch.py --promote    # also freeze → raw
+uv run python scripts/compile.py --duckdb   # → derived
+```
 
 SSH key backup (for agenix / GitHub on a new Mac):  
 `~/Library/CloudStorage/ProtonDrive-*/SSHKeys/` — refresh with [`scripts/ssh-key-backup.sh`](scripts/ssh-key-backup.sh).
@@ -352,13 +376,7 @@ Cask + config in [`home/zotero.nix`](home/zotero.nix). Firefox Connector via [`h
 
 **Auto-clone** on rebuild ([`hosts/macbook/projects.toml`](hosts/macbook/projects.toml)): only if the destination does **not** exist. Currently: `josephbb.github.io` enabled; `dotfiles` listed but disabled.
 
-**Python template:**
-
-```bash
-nix flake new -t ~/dotfiles#python ~/Projects/my-analysis
-```
-
-See [Python projects](#python-projects) above.
+Flake starters: [`templates/README.md`](templates/README.md) (`scratch`, `bayes`, `openalex`, `r`).
 
 ---
 
@@ -381,6 +399,18 @@ ollama-setup                 # start, pull defaults, prune retired
 Tuned for **M5 Max / 128GB**. Continue v2 reads [`~/.continue/config.yaml`](home/ollama.nix) (not the old `config.json`). `rebuild` does **not** pull models; use `ollama-setup`. Disable: `feature-disable ollama` → `rebuild` (models left on disk).
 
 If Continue’s Models UI shows empty Chat/Autocomplete/Edit slots, reload the VS Code window after `rebuild` so it picks up the managed `config.yaml`.
+
+---
+
+## Optional: Cursor
+
+Flag: [`hosts/macbook/features.toml`](hosts/macbook/features.toml) · wiring: [`home/cursor.nix`](home/cursor.nix).
+
+```bash
+feature-enable cursor && rebuild
+```
+
+Installs the Cursor cask, pins it on the Dock, writes [`editor-settings.nix`](home/editor-settings.nix) into Cursor’s `settings.json`, and installs the same extension stack as VS Code (Python, research, blog, theme — not Continue). Disable: `feature-disable cursor` → `rebuild` (app may remain until brew zap).
 
 ---
 

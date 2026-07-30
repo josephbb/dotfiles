@@ -1,0 +1,11 @@
+.Rproj.user/
+.Rhistory
+.Rdata
+.RData
+.DS_Store
+.direnv/
+renv/library/
+renv/staging/
+renv/python/
+*_cache/
+.quarto/

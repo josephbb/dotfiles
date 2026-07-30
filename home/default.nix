@@ -8,6 +8,7 @@
     ./git.nix
     ./firefox.nix
     ./vscode.nix
+    ./cursor.nix
     ./zotero.nix
     ./ollama.nix
   ];

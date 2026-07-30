@@ -1,0 +1,22 @@
+# OpenAlex project config — edit filters / slug; keep secrets in the environment.
+
+[project]
+# Used under ~/Datasets/{scratch,raw,derived}/<project_slug>/openalex/
+project_slug = "oa-example"
+mailto = "jbakcoleman@gmail.com"
+datasets_root = "~/Datasets"
+
+[openalex]
+# Polite pool + API key (OPENALEX_API_KEY from `openalex-load`)
+per_page = 200
+# Example: works citing a concept or filtered search. Adjust for your study.
+# filter is passed to the OpenAlex works endpoint.
+filter = "concepts.id:C41008148"
+# Optional: cap pages during testing (null / omit = no cap)
+max_pages = 2
+
+[paths]
+# Relative to datasets_root / project_slug / openalex
+scratch_subdir = "scratch"
+raw_subdir = "raw"
+derived_subdir = "derived"

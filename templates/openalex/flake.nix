@@ -1,5 +1,5 @@
 {
-  description = "Barebones Python analysis (nix + uv)";
+  description = "OpenAlex dataset harvest (nix + uv)";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -22,13 +22,10 @@
           packages = with pkgs; [
             uv
             git
-            # Native libs for SciPy / PyTensor / PyMC stack
             stdenv.cc.cc.lib
-            pkg-config
             zlib
             libffi
             openssl
-            openblas
           ];
 
           shellHook = ''
@@ -39,7 +36,6 @@
                 pkgs.zlib
                 pkgs.libffi
                 pkgs.openssl
-                pkgs.openblas
               ]
             }:''${LD_LIBRARY_PATH:-}"
             export DYLD_LIBRARY_PATH="${
@@ -48,7 +44,6 @@
                 pkgs.zlib
                 pkgs.libffi
                 pkgs.openssl
-                pkgs.openblas
               ]
             }:''${DYLD_LIBRARY_PATH:-}"
 
@@ -58,7 +53,9 @@
             fi
             # shellcheck disable=SC1091
             source .venv/bin/activate
-            echo "Ready (python=$(python --version)). Run ./scripts/install_kernel.sh for VS Code."
+            echo "OpenAlex template ready. Load creds with: openalex-load"
+            echo "  uv run python scripts/fetch.py"
+            echo "  uv run python scripts/compile.py"
           '';
         };
       }

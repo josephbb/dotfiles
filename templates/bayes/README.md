@@ -1,16 +1,18 @@
-# Python analysis template
+# Bayes (PyMC) analysis template
 
-Barebones **nix + uv** starter: data/output folders, `src/`, `analysis.ipynb`, and a VS Code kernel installer.
+**nix + uv** starter with the PyMC / ArviZ stack: data/output folders, `src/`, `analysis.ipynb`, palettes, and a VS Code kernel installer.
 
 ## Create a project
 
 ```bash
-nix flake new -t ~/dotfiles#python ~/Projects/my-analysis
-cd ~/Projects/my-analysis
+nix flake new -t ~/dotfiles#bayes ~/Projects/my-model
+cd ~/Projects/my-model
 direnv allow          # or: nix develop
 uv sync
 ./scripts/install_kernel.sh
 ```
+
+(Former `#python` template — use `#bayes` now.)
 
 ## Layout
 

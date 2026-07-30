@@ -49,13 +49,25 @@
         ];
       };
 
-      # Project starters: nix flake new -t ~/dotfiles#python ~/Projects/my-analysis
+      # Project starters: nix flake new -t ~/dotfiles#<name> ~/Projects/...
       templates = {
-        python = {
-          path = ./templates/python;
-          description = "Barebones Python analysis (nix + uv + PyMC/pandas/polars)";
+        scratch = {
+          path = ./templates/scratch;
+          description = "Light reproducible Python sandbox (blog / quick analysis)";
         };
-        default = self.templates.python;
+        bayes = {
+          path = ./templates/bayes;
+          description = "Python + uv + PyMC / ArviZ Bayesian analysis";
+        };
+        openalex = {
+          path = ./templates/openalex;
+          description = "OpenAlex harvest → Parquet datasets under ~/Datasets";
+        };
+        r = {
+          path = ./templates/r;
+          description = "R + renv + Quarto stub";
+        };
+        default = self.templates.scratch;
       };
 
       # Convenience: nix fmt

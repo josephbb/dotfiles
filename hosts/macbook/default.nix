@@ -24,6 +24,7 @@ let
     ''
   ) enabledProjects;
   ollamaEnabled = features.ollama.enabled or false;
+  cursorEnabled = features.cursor.enabled or false;
 in
 {
   # Determinate Nix manages the nix installation; don't let nix-darwin clobber it.
@@ -58,16 +59,24 @@ in
         "raycast"
         "visual-studio-code"
         "firefox"
+        "google-chrome"
         "proton-drive"
+        "protonvpn"
+        "proton-pass"
         "zotero"
+        "obsidian"
         "rstudio"
         "zoom"
         "signal"
         "tidal"
+        "ankerwork"
       ]
       ++ lib.optionals ollamaEnabled [
         # Prefer brew cask over curl|sh; ships app + CLI for local models.
         "ollama-app"
+      ]
+      ++ lib.optionals cursorEnabled [
+        "cursor"
       ];
   };
 
@@ -84,17 +93,26 @@ in
       orientation = "bottom"; # change to "left" or "right" later if desired
       show-recents = false;
       # Curated pins only — rebuild replaces the Dock app list.
-      persistent-apps = [
-        "/Applications/Firefox.app"
-        "/Applications/Ghostty.app"
-        "/Applications/Visual Studio Code.app"
-        "/Applications/RStudio.app"
-        "/System/Applications/Messages.app"
-        "/Applications/Signal.app"
-        "/Applications/zoom.us.app"
-        "/Applications/TIDAL.app"
-        "/System/Applications/System Settings.app"
-      ];
+      persistent-apps =
+        [
+          "/Applications/Firefox.app"
+          "/System/Applications/Mail.app"
+          "/System/Applications/Calendar.app"
+          "/Applications/Ghostty.app"
+          "/Applications/Visual Studio Code.app"
+        ]
+        ++ lib.optionals cursorEnabled [
+          "/Applications/Cursor.app"
+        ]
+        ++ [
+          "/Applications/Obsidian.app"
+          "/Applications/RStudio.app"
+          "/System/Applications/Messages.app"
+          "/Applications/Signal.app"
+          "/Applications/zoom.us.app"
+          "/Applications/TIDAL.app"
+          "/System/Applications/System Settings.app"
+        ];
       persistent-others = [ ];
     };
     finder.FXPreferredViewStyle = "clmv";

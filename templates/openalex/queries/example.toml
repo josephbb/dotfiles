@@ -1,0 +1,6 @@
+# Named query stubs — copy/edit; fetch.py reads config.toml [openalex] by default.
+# Add more files and wire them in scripts when you outgrow a single filter.
+
+[example_concept]
+description = "Example: works tagged with a concept id"
+filter = "concepts.id:C41008148"

@@ -1,0 +1,26 @@
+---
+title: "Analysis"
+author: "Joe Bak-Coleman"
+format:
+  html:
+    toc: true
+    code-fold: false
+---
+
+# Scratch analysis
+
+Edit `config` / data paths as needed. Packages are managed with **renv** inside this project; the nix flake provides `R` and `quarto`.
+
+```{r}
+#| label: setup
+# After first clone:
+#   renv::init()   # or renv::restore() if lockfile is filled in
+# install.packages(c("tidyverse", "here"))  # then renv::snapshot()
+
+message("R ", getRversion())
+```
+
+```{r}
+#| label: hello
+plot(1:10, main = "placeholder")
+```
