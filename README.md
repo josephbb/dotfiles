@@ -29,7 +29,6 @@ Declarative macOS setup for Joe’s machine via **[nix-darwin](https://github.co
 - [Zotero](#zotero)
 - [Projects & templates](#projects--templates)
 - [Optional: Ollama + Continue](#optional-ollama--continue)
-- [Optional: Cursor](#optional-cursor)
 - [Fresh Mac](#fresh-mac)
 - [Raycast](#raycast)
 
@@ -46,7 +45,7 @@ Declarative macOS setup for Joe’s machine via **[nix-darwin](https://github.co
 - **Research-shaped** — `~/Projects`, Proton-backed `~/Datasets/{raw,derived}`, local `scratch`, TeX Live, Zotero → bib, no conda.
 - **Secrets stay encrypted** — API keys via [agenix](https://github.com/ryantm/agenix); Apple/Proton/`gh auth` stay interactive.
 
-What this does *not* own: cloud account state, Keychron firmware (JSON backup only), or full macOS visual theming beyond Dock/defaults. Cursor is optional via [`features.toml`](hosts/macbook/features.toml) (mirrors VS Code when enabled).
+What this does *not* own: cloud account state, Keychron firmware (JSON backup only), Cursor (install separately; not flake-managed), or full macOS visual theming beyond Dock/defaults.
 
 ---
 
@@ -64,7 +63,7 @@ sudo darwin-rebuild switch --flake ~/dotfiles#macbook
 
 [`scripts/rebuild.sh`](scripts/rebuild.sh) then runs safe cleanup: `brew cleanup`, nix GC, store optimise, and `ollama prune` if Ollama is present (**does not** pull models).
 
-Toggle optional features: `feature status` · `feature-enable ollama` · `feature-enable cursor` ([`scripts/feature.sh`](scripts/feature.sh)).
+Toggle optional features: `feature status` · `feature-enable ollama` · `feature-disable ollama` ([`scripts/feature.sh`](scripts/feature.sh)).
 
 ---
 
@@ -79,8 +78,8 @@ home/                     # home-manager modules
   secrets.nix             # agenix wiring
   shell.nix               # zsh, starship, fzf, zoxide, tmux, Ghostty
   git.nix                 # git + gh + delta
-  vscode.nix / cursor.nix / firefox.nix / zotero.nix / ollama.nix
-  editor-settings.nix     # shared VS Code ↔ Cursor settings
+  vscode.nix / firefox.nix / zotero.nix / ollama.nix
+  editor-settings.nix     # VS Code userSettings
 secrets/                  # encrypted .age files
 secrets.nix               # agenix recipients (SSH public keys)
 templates/                # scratch · bayes · openalex · r — see templates/README.md
@@ -103,9 +102,9 @@ Declared in [`hosts/macbook/default.nix`](hosts/macbook/default.nix):
 | [Ghostty](https://ghostty.org/) | Terminal |
 | [Raycast](https://www.raycast.com/) | Launcher / window mgmt (hotkeys set in UI) |
 | [Visual Studio Code](https://code.visualstudio.com/) | Primary editor (extensions via HM) |
-| [Cursor](https://www.cursor.com/) | AI editor — **only if** `[cursor] enabled` in [`features.toml`](hosts/macbook/features.toml) |
 | [Firefox](https://www.mozilla.org/firefox/) | Default browser + Zotero Connector |
 | [Google Chrome](https://www.google.com/chrome/) | Secondary browser |
+| [Chromium](https://www.chromium.org/) | Chromium browser |
 | [Proton Drive](https://proton.me/drive) | Sync (Datasets raw/derived, SSH key backup) |
 | [Proton VPN](https://protonvpn.com/) | VPN |
 | [Proton Pass](https://proton.me/pass) | Password manager |
@@ -119,7 +118,7 @@ Declared in [`hosts/macbook/default.nix`](hosts/macbook/default.nix):
 
 ### Dock
 
-Pinned (rebuild replaces the list): Firefox, Mail, Calendar, Ghostty, VS Code, Cursor *(if enabled)*, Obsidian, RStudio, Messages, Signal, Zoom, TIDAL, System Settings.
+Pinned (rebuild replaces the list): Firefox, Mail, Calendar, Ghostty, VS Code, Obsidian, RStudio, Messages, Signal, Zoom, TIDAL, System Settings.
 
 ### Shell & CLI
 
@@ -152,7 +151,7 @@ From [`home/research.nix`](home/research.nix):
 
 ### Editors
 
-**VS Code** — app via brew; settings/extensions in [`home/vscode.nix`](home/vscode.nix) (settings shared via [`home/editor-settings.nix`](home/editor-settings.nix)):
+**VS Code** — app via brew; settings/extensions in [`home/vscode.nix`](home/vscode.nix) (settings via [`home/editor-settings.nix`](home/editor-settings.nix)):
 
 | Extension area | Packages |
 |---|---|
@@ -165,14 +164,14 @@ From [`home/research.nix`](home/research.nix):
 
 **RStudio** — brew cask; uses nixpkgs `R` on PATH. Prefer `radian` in the terminal.
 
-**Cursor** — optional (`feature-enable cursor`). When on: brew cask + Dock pin; settings and the same research/blog extension stack as VS Code ([`home/cursor.nix`](home/cursor.nix)). Skips Continue (Cursor’s own agent).
+**Cursor** — not managed by this flake (install from [cursor.com](https://www.cursor.com/) if you want it).
 
 ### Fonts & themes
 
 | Where | Theme / font |
 |---|---|
 | Ghostty | Gruvbox Material Dark · **IosevkaTerm Nerd Font** 14 |
-| VS Code / Cursor | Gruvbox Material Dark (hard contrast) · same font family 13 |
+| VS Code | Gruvbox Material Dark (hard contrast) · same font family 13 |
 | System font | `nerd-fonts.iosevka-term` via nix-darwin |
 
 ---
@@ -189,7 +188,7 @@ Declared in [`home/shell.nix`](home/shell.nix) (plus Zotero / secrets / Ollama m
 | `cat` | `bat` |
 | `g` | `git` |
 | `rebuild` | Apply flake + cleanup ([`scripts/rebuild.sh`](scripts/rebuild.sh)) |
-| `feature` / `feature-enable` / `feature-disable` | Optional features (`ollama`, `cursor`) |
+| `feature` / `feature-enable` / `feature-disable` | Optional features ([`features.toml`](hosts/macbook/features.toml)) |
 | `colima-start` | Start Docker VM (4 CPU / 8 GB / 60 GB disk) |
 | `zot` / `zot-bib` / `zot-plugins` | Zotero helpers |
 | `openalex-load` / `openalex-show-path` | Load / show OpenAlex env file |
@@ -399,18 +398,6 @@ ollama-setup                 # start, pull defaults, prune retired
 Tuned for **M5 Max / 128GB**. Continue v2 reads [`~/.continue/config.yaml`](home/ollama.nix) (not the old `config.json`). `rebuild` does **not** pull models; use `ollama-setup`. Disable: `feature-disable ollama` → `rebuild` (models left on disk).
 
 If Continue’s Models UI shows empty Chat/Autocomplete/Edit slots, reload the VS Code window after `rebuild` so it picks up the managed `config.yaml`.
-
----
-
-## Optional: Cursor
-
-Flag: [`hosts/macbook/features.toml`](hosts/macbook/features.toml) · wiring: [`home/cursor.nix`](home/cursor.nix).
-
-```bash
-feature-enable cursor && rebuild
-```
-
-Installs the Cursor cask, pins it on the Dock, writes [`editor-settings.nix`](home/editor-settings.nix) into Cursor’s `settings.json`, and installs the same extension stack as VS Code (Python, research, blog, theme — not Continue). Disable: `feature-disable cursor` → `rebuild` (app may remain until brew zap).
 
 ---
 

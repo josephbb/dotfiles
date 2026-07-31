@@ -8,8 +8,3 @@ enabled = true
 #   llama3.3:70b-instruct-q4_K_M
 #   qwen3-coder:30b-a3b-q8_0
 #   qwen2.5-coder:7b-base-q4_K_M
-
-[cursor]
-enabled = true
-# When enabled: Homebrew cask `cursor`, Dock pin, settings + extensions mirrored from VS Code
-# (see home/cursor.nix / home/editor-settings.nix). Skip Continue — Cursor has its own agent.

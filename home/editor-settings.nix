@@ -1,4 +1,4 @@
-# Shared editor settings — VS Code (HM) and optional Cursor feature.
+# Shared VS Code user settings (home/vscode.nix).
 { homeDirectory }:
 {
   # Always dark — match Ghostty (does not follow macOS appearance)

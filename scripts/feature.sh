@@ -11,12 +11,11 @@ Usage: $(basename "$0") <enable|disable|status> [feature]
 
 Features:
   ollama   Local LLM runtime + VS Code Continue (large models; needs rebuild)
-  cursor   Cursor app + settings/extensions mirrored from VS Code (needs rebuild)
 
 Examples:
   $(basename "$0") status
   $(basename "$0") enable ollama
-  $(basename "$0") disable cursor
+  $(basename "$0") disable ollama
 EOF
 }
 
@@ -70,7 +69,6 @@ case "$cmd" in
   status)
     echo "Feature flags ($FEATURES):"
     echo "  ollama.enabled = $(get_enabled ollama)"
-    echo "  cursor.enabled = $(get_enabled cursor)"
     ;;
   enable)
     current="$(get_enabled "$feature" || true)"
@@ -92,15 +90,6 @@ Enable Ollama?
   - Tuned for M5 Max / 128GB unified memory.
 EOF
         ;;
-      cursor)
-        cat <<'EOF'
-Enable Cursor?
-  - Installs Homebrew cask: cursor
-  - Pins Cursor on the Dock
-  - Mirrors VS Code settings (home/editor-settings.nix) into Cursor
-  - Installs the same research/blog extension stack (skips Continue)
-EOF
-        ;;
       *)
         echo "Unknown feature: $feature" >&2
         usage
@@ -115,14 +104,6 @@ EOF
     echo "Enabled [$feature]. Run: rebuild"
     ;;
   disable)
-    case "$feature" in
-      ollama | cursor) ;;
-      *)
-        echo "Unknown feature: $feature" >&2
-        usage
-        exit 1
-        ;;
-    esac
     if ! ask_confirm "Disable [$feature]?"; then
       echo "Aborted."
       exit 1
