@@ -1,22 +1,32 @@
 [project]
 name = "analysis"
 version = "0.1.0"
-description = "Bayesian analysis with PyMC (nix + uv)"
+description = "Bayesian analysis with PyMC / NumPyro / CmdStanPy (nix + uv)"
 requires-python = ">=3.12,<3.13"
 dependencies = [
   "numpy>=1.26",
   "scipy>=1.13",
   "pandas>=2.2",
   "polars>=1.0",
-  "pymc[nutpie]>=6",
-  "arviz>=0.20",
-  "xarray>=2024.1",
   "matplotlib>=3.8",
+  "xarray>=2024.1",
+  # PPLs
+  "pymc[nutpie]>=6",
+  "cmdstanpy>=1.2",
+  "numpyro>=0.16",
+  "jax>=0.4",
+  # Diagnostics, comparison, visualization
+  "arviz>=0.20",
+  "graphviz>=0.20",
+  # Formula interface + variable selection (selected case studies)
+  "bambi>=0.14",
+  "kulprit>=0.3",
 ]
 
 [dependency-groups]
 dev = [
   "ipykernel>=6.29",
+  "ipywidgets>=8.1",
   "jupyter-client>=8.6",
 ]
 

@@ -1,4 +1,6 @@
-# OpenAlex project config — edit filters / slug; keep secrets in the environment.
+# OpenAlex project config — edit [query.*]; keep API secrets in the environment.
+# Query shape matches josephbb/LLMDiscourse (dataset_config.toml [query]) so you
+# can grow this template into a fuller analysis repo later.
 
 [project]
 # Used under ~/Datasets/{scratch,raw,derived}/<project_slug>/openalex/
@@ -7,16 +9,50 @@ mailto = "jbakcoleman@gmail.com"
 datasets_root = "~/Datasets"
 
 [openalex]
-# Polite pool + API key (OPENALEX_API_KEY from `openalex-load`)
-per_page = 200
-# Example: works citing a concept or filtered search. Adjust for your study.
-# filter is passed to the OpenAlex works endpoint.
-filter = "concepts.id:C41008148"
-# Optional: cap pages during testing (null / omit = no cap)
+# Template-only: cap pages while testing (omit / null = fetch all)
 max_pages = 2
 
-[paths]
-# Relative to datasets_root / project_slug / openalex
-scratch_subdir = "scratch"
-raw_subdir = "raw"
-derived_subdir = "derived"
+[query]
+
+[query.abstract]
+# When true, add has_abstract:true (Nature news/comments often lack abstracts)
+required = false
+
+[query.years]
+start = 2022
+# omit end for an open range (e.g. 2022-)
+# end = 2026
+
+[query.works]
+type = "article"
+
+[query.journals]
+# When false, no primary_location.source.id filter (all sources)
+enabled = false
+ids = [
+    # "S137773608",  # Nature
+]
+
+[query.citations]
+# Minimum cited_by_count (0 = no filter; 2 = cited at least twice)
+min = 0
+
+[query.search]
+# Modes: title_and_abstract | title_and_abstract.exact | fulltext | fulltext.exact
+# Prefer .exact to cut stemming false positives; re-fetch after changing.
+mode = "title_and_abstract.exact"
+terms = [
+    "large language model",
+    "ChatGPT",
+]
+
+[query.sort]
+by = "relevance_score:desc"
+
+[query.download]
+# Max per-page for /works (OpenAlex allows up to 200)
+per_page = 200
+
+[query.domain]
+# Limit to OpenAlex Social Sciences (primary_topic.domain.id = 2)
+social_sciences = false

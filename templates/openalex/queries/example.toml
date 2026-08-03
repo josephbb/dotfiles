@@ -1,6 +1,44 @@
-# Named query stubs — copy/edit; fetch.py reads config.toml [openalex] by default.
-# Add more files and wire them in scripts when you outgrow a single filter.
+# Optional named-query scratch pad. fetch.py reads config.toml [query] by default.
+# Copy blocks into config.toml when you outgrow a single corpus definition.
 
-[example_concept]
-description = "Example: works tagged with a concept id"
-filter = "concepts.id:C41008148"
+[query.abstract]
+required = false
+
+[query.years]
+start = 2022
+
+[query.works]
+type = "article"
+
+[query.journals]
+enabled = true
+ids = [
+    "S125754415",
+    "S137773608",
+    "S2737427234",
+    "S2764866340",
+    "S3880285",
+    "S4220651275",
+    "S64187185",
+]
+
+[query.citations]
+min = 0
+
+[query.search]
+mode = "title_and_abstract.exact"
+terms = [
+    "large language model",
+    "large language models",
+    "LLM",
+    "ChatGPT",
+]
+
+[query.sort]
+by = "relevance_score:desc"
+
+[query.download]
+per_page = 200
+
+[query.domain]
+social_sciences = true

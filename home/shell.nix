@@ -117,7 +117,7 @@
   xdg.configFile."ghostty/config".text = ''
     font-family = IosevkaTerm Nerd Font
     font-size = 14
-    theme = Everforest Dark Hard
+    theme = Gruvbox Material Dark
     macos-option-as-alt = true
     window-padding-x = 8
     window-padding-y = 6

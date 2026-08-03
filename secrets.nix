@@ -3,4 +3,5 @@ let
 in
 {
   "secrets/openalex.env.age".publicKeys = [ jbakcoleman ];
+  "secrets/tie-verify.env.age".publicKeys = [ jbakcoleman ];
 }

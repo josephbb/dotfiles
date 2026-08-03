@@ -29,6 +29,9 @@
     docker
     docker-compose
 
+    # Databases
+    postgresql
+
     # Python / reproducibility
     uv
     direnv

@@ -1,6 +1,6 @@
-# Bayes (PyMC) analysis template
+# Bayes analysis template
 
-**nix + uv** starter with the PyMC / ArviZ stack: data/output folders, `src/`, `analysis.ipynb`, palettes, and a VS Code kernel installer.
+**nix + uv** starter for Bayesian workflows: PyMC, NumPyro, CmdStanPy, ArviZ, Bambi, and Kulprit — plus data/output folders, `src/`, `analysis.ipynb`, palettes, and a VS Code kernel installer.
 
 ## Create a project
 
@@ -23,8 +23,8 @@ data/                 # inputs (gitignored contents)
 output/               # figures, tables, traces (gitignored contents)
 src/                  # your modules (includes palettes.py)
 scripts/install_kernel.sh
-flake.nix             # dev shell + native libs for SciPy/PyMC
-pyproject.toml        # numpy, scipy, pandas, polars, pymc[nutpie], arviz, …
+flake.nix             # dev shell + native libs (SciPy / PyMC / CmdStan)
+pyproject.toml
 ```
 
 Load a palette in a notebook:
@@ -37,4 +37,18 @@ p = load_palette("hinoki_forest")
 
 ## Stack
 
-numpy, scipy, pandas, polars, pymc (≥6) with nutpie, arviz, xarray, matplotlib — plus `ipykernel` for notebooks.
+| Role | Packages |
+|---|---|
+| Data / plots | numpy, scipy, pandas, polars, matplotlib, xarray |
+| PPLs | **PyMC** (+ nutpie), **NumPyro** (+ JAX), **CmdStanPy** |
+| Diagnostics / comparison | **ArviZ** |
+| Formula models | **Bambi** (selected case studies) |
+| Variable selection | **Kulprit** |
+| Model graphs | **graphviz** (Python) + `dot` from the flake |
+| Notebooks | ipykernel |
+
+CmdStan comes from the flake (`CMDSTAN` is set in the shell). If you ever need a local install instead:
+
+```bash
+python -c 'import cmdstanpy; cmdstanpy.install_cmdstan()'
+```

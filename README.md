@@ -132,6 +132,7 @@ From [`home/packages.nix`](home/packages.nix) + [`home/shell.nix`](home/shell.ni
 | Git | `git`, `git-lfs`, `gh`, `lazygit`, **delta** diffs |
 | Process | `htop`, `btop`, `tmux` |
 | Containers | `colima`, `docker`, `docker-compose` |
+| Databases | `postgresql` (`psql`, server binaries) |
 | Python tooling | `uv`, `direnv`, `nix-direnv` |
 | Nix | `nixfmt`, `nil` |
 | Misc | `curl`, `wget`, `tldr`, `shellcheck`, `sl`, `agenix` |

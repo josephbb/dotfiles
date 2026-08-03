@@ -1,5 +1,5 @@
 {
-  description = "Bayesian analysis with PyMC (nix + uv)";
+  description = "Bayesian analysis with PyMC / NumPyro / CmdStanPy (nix + uv)";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -16,41 +16,39 @@
       system:
       let
         pkgs = import nixpkgs { inherit system; };
+        libPath = pkgs.lib.makeLibraryPath (
+          [
+            pkgs.stdenv.cc.cc.lib
+            pkgs.zlib
+            pkgs.libffi
+            pkgs.openssl
+          ]
+          ++ pkgs.lib.optionals pkgs.stdenv.isLinux [ pkgs.openblas ]
+        );
       in
       {
         devShells.default = pkgs.mkShell {
           packages = with pkgs; [
             uv
             git
-            # Native libs for SciPy / PyTensor / PyMC stack
+            cmdstan
+            graphviz # `dot` for Bambi / PyMC model graphs
             stdenv.cc.cc.lib
             pkg-config
             zlib
             libffi
             openssl
-            openblas
-          ];
+          ]
+          ++ pkgs.lib.optionals pkgs.stdenv.isLinux [ openblas ];
 
           shellHook = ''
             export UV_PYTHON_PREFERENCE=managed
-            export LD_LIBRARY_PATH="${
-              pkgs.lib.makeLibraryPath [
-                pkgs.stdenv.cc.cc.lib
-                pkgs.zlib
-                pkgs.libffi
-                pkgs.openssl
-                pkgs.openblas
-              ]
-            }:''${LD_LIBRARY_PATH:-}"
-            export DYLD_LIBRARY_PATH="${
-              pkgs.lib.makeLibraryPath [
-                pkgs.stdenv.cc.cc.lib
-                pkgs.zlib
-                pkgs.libffi
-                pkgs.openssl
-                pkgs.openblas
-              ]
-            }:''${DYLD_LIBRARY_PATH:-}"
+            export CMDSTAN="${pkgs.cmdstan}/opt/cmdstan"
+            # macOS wheels link Accelerate; nix OpenBLAS on DYLD_* breaks NumPy.
+            unset DYLD_LIBRARY_PATH DYLD_FALLBACK_LIBRARY_PATH DYLD_INSERT_LIBRARIES
+            ${pkgs.lib.optionalString pkgs.stdenv.isLinux ''
+              export LD_LIBRARY_PATH="${libPath}:''${LD_LIBRARY_PATH:-}"
+            ''}
 
             if [ ! -d .venv ]; then
               echo "Creating .venv (uv sync)…"
