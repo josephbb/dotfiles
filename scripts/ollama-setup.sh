@@ -129,7 +129,7 @@ start_ollama() {
     echo "Starting ollama serve in background…"
     nohup ollama serve >/tmp/ollama-serve.log 2>&1 &
   else
-    echo "Ollama not installed. Enable [ollama] in hosts/macbook/features.toml and run: rebuild" >&2
+    echo "Ollama not installed. Enable [ollama] in hosts/<host>/features.toml and run: rebuild" >&2
     exit 1
   fi
 

@@ -1,6 +1,5 @@
 {
   lib,
-  pkgs,
   username,
   features,
   ...
@@ -24,22 +23,12 @@ let
     ''
   ) enabledProjects;
   ollamaEnabled = features.ollama.enabled or false;
+  researchEnabled = features.research.enabled or true;
 in
 {
-  # Determinate Nix manages the nix installation; don't let nix-darwin clobber it.
-  nix.enable = false;
+  imports = [ ../common ];
 
   nixpkgs.hostPlatform = "aarch64-darwin";
-  nixpkgs.config.allowUnfree = true;
-
-  # Used for backwards compatibility; leave alone once set.
-  system.stateVersion = 5;
-
-  system.primaryUser = username;
-
-  users.users.${username} = {
-    home = "/Users/${username}";
-  };
 
   # GUI apps via Homebrew (declared here; CLI comes from home-manager).
   homebrew = {
@@ -65,11 +54,13 @@ in
         "proton-pass"
         "zotero"
         "obsidian"
-        "rstudio"
         "zoom"
         "signal"
         "tidal"
         "ankerwork"
+      ]
+      ++ lib.optionals researchEnabled [
+        "rstudio"
       ]
       ++ lib.optionals ollamaEnabled [
         # Prefer brew cask over curl|sh; ships app + CLI for local models.
@@ -77,91 +68,34 @@ in
       ];
   };
 
-  # Fonts available system-wide for Ghostty / editors.
-  fonts.packages = with pkgs; [
-    nerd-fonts.iosevka-term
-  ];
-
-  # Sensible macOS defaults (light touch; expand later).
-  system.defaults = {
-    dock = {
-      autohide = false;
-      tilesize = 42; # default is 64; lower = smaller icons
-      orientation = "bottom"; # change to "left" or "right" later if desired
-      show-recents = false;
-      # Curated pins only — rebuild replaces the Dock app list.
-      persistent-apps = [
+  system.defaults.dock = {
+    autohide = false;
+    tilesize = 42; # default is 64; lower = smaller icons
+    orientation = "bottom"; # change to "left" or "right" later if desired
+    show-recents = false;
+    # Curated pins only — rebuild replaces the Dock app list.
+    persistent-apps =
+      [
         "/Applications/Firefox.app"
         "/System/Applications/Mail.app"
         "/System/Applications/Calendar.app"
         "/Applications/Ghostty.app"
         "/Applications/Visual Studio Code.app"
         "/Applications/Obsidian.app"
+        "/Applications/Zotero.app"
+      ]
+      ++ lib.optionals researchEnabled [
         "/Applications/RStudio.app"
+      ]
+      ++ [
         "/System/Applications/Messages.app"
         "/Applications/Signal.app"
         "/Applications/zoom.us.app"
         "/Applications/TIDAL.app"
         "/System/Applications/System Settings.app"
       ];
-      persistent-others = [ ];
-    };
-    finder.FXPreferredViewStyle = "clmv";
-    NSGlobalDomain.AppleShowAllExtensions = true;
+    persistent-others = [ ];
   };
 
-  # Create standard working directories on activate.
-  # Datasets: raw/derived live on Proton Drive (synced); scratch stays local-only.
-  system.activationScripts.extraActivation.text = ''
-    mkdir -p /Users/${username}/Projects
-    mkdir -p /Users/${username}/Datasets/scratch
-    mkdir -p /Users/${username}/References
-    chown ${username}:staff /Users/${username}/Projects /Users/${username}/Datasets /Users/${username}/References
-    chown -R ${username}:staff /Users/${username}/Datasets/scratch
-
-    # Prefer Proton Drive for durable dataset tiers when the client folder exists.
-    PD_ROOT=$(find /Users/${username}/Library/CloudStorage -maxdepth 1 -type d -name 'ProtonDrive-*-folder' 2>/dev/null | head -1 || true)
-    if [ -n "$PD_ROOT" ]; then
-      PD_DATASETS="$PD_ROOT/Datasets"
-      mkdir -p "$PD_DATASETS/raw" "$PD_DATASETS/derived"
-      chown -R ${username}:staff "$PD_DATASETS"
-
-      for sub in raw derived; do
-        target="$PD_DATASETS/$sub"
-        link="/Users/${username}/Datasets/$sub"
-        if [ -L "$link" ]; then
-          # Already linked; refresh if it points elsewhere.
-          current=$(readlink "$link" || true)
-          if [ "$current" != "$target" ]; then
-            rm -f "$link"
-            ln -s "$target" "$link"
-            chown -h ${username}:staff "$link"
-          fi
-        elif [ -d "$link" ]; then
-          # Migrate any existing local contents onto Proton, then replace with symlink.
-          echo "Datasets: migrating $sub -> Proton Drive"
-          rsync -a "$link"/ "$target"/
-          rm -rf "$link"
-          ln -s "$target" "$link"
-          chown -h ${username}:staff "$link"
-        else
-          ln -s "$target" "$link"
-          chown -h ${username}:staff "$link"
-        fi
-      done
-    else
-      echo "Datasets: Proton Drive folder not found; using local raw/derived"
-      mkdir -p /Users/${username}/Datasets/raw /Users/${username}/Datasets/derived
-      chown -R ${username}:staff /Users/${username}/Datasets
-    fi
-
-    ${projectCloneScript}
-  '';
-
-  # Set Firefox as default browser (macOS may show a one-time confirmation dialog).
-  system.activationScripts.postActivation.text = ''
-    if [ -x /opt/homebrew/bin/defaultbrowser ]; then
-      sudo -u ${username} /opt/homebrew/bin/defaultbrowser firefox || true
-    fi
-  '';
+  system.activationScripts.extraActivation.text = lib.mkAfter projectCloneScript;
 }

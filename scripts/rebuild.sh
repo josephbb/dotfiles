@@ -1,14 +1,18 @@
 #!/usr/bin/env bash
-# Apply the macbook flake, then run safe post-switch cleanup.
+# Apply a host flake attribute, then run safe post-switch cleanup.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-FLAKE="${DOTFILES_FLAKE:-$ROOT#macbook}"
+# Override with DOTFILES_HOST, or DOTFILES_FLAKE for a full flake ref.
+HOST="${DOTFILES_HOST:-macbook}"
+FLAKE="${DOTFILES_FLAKE:-$ROOT#$HOST}"
 OLLAMA_SETUP="$ROOT/scripts/ollama-setup.sh"
 
 usage() {
   cat <<EOF
 Usage: $(basename "$0") [darwin-rebuild args...]
+
+Host: $HOST (set DOTFILES_HOST to target another hosts/<name> config)
 
 Runs:
   1. sudo darwin-rebuild switch --flake $FLAKE …

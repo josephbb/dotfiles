@@ -26,27 +26,39 @@
     let
       system = "aarch64-darwin";
       username = "jbakcoleman";
-      features = builtins.fromTOML (builtins.readFile ./hosts/macbook/features.toml);
+
+      # One directory under hosts/<name>/ → darwinConfigurations.<name>
+      mkDarwin =
+        hostName:
+        let
+          hostPath = ./hosts + "/${hostName}";
+          features = builtins.fromTOML (builtins.readFile (hostPath + "/features.toml"));
+        in
+        nix-darwin.lib.darwinSystem {
+          inherit system;
+          specialArgs = { inherit username features; };
+          modules = [
+            hostPath
+            home-manager.darwinModules.home-manager
+            {
+              home-manager.useGlobalPkgs = true;
+              home-manager.useUserPackages = true;
+              home-manager.sharedModules = [ agenix.homeManagerModules.default ];
+              # Back up preexisting dotfiles instead of failing the switch.
+              home-manager.backupFileExtension = "backup";
+              home-manager.extraSpecialArgs = {
+                inherit username features agenix;
+              };
+              home-manager.users.${username} = import ./home;
+            }
+          ];
+        };
     in
     {
-      darwinConfigurations.macbook = nix-darwin.lib.darwinSystem {
-        inherit system;
-        specialArgs = { inherit username features; };
-        modules = [
-          ./hosts/macbook
-          home-manager.darwinModules.home-manager
-          {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-            home-manager.sharedModules = [ agenix.homeManagerModules.default ];
-            # Back up preexisting dotfiles instead of failing the switch.
-            home-manager.backupFileExtension = "backup";
-            home-manager.extraSpecialArgs = {
-              inherit username features agenix;
-            };
-            home-manager.users.${username} = import ./home;
-          }
-        ];
+      darwinConfigurations = {
+        macbook = mkDarwin "macbook";
+        # Add another host: copy hosts/macbook → hosts/<name>, tune features.toml / casks, then:
+        #   <name> = mkDarwin "<name>";
       };
 
       # Project starters: nix flake new -t ~/dotfiles#<name> ~/Projects/...

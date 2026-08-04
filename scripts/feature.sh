@@ -1,21 +1,28 @@
 #!/usr/bin/env bash
-# Interactively enable/disable optional features in hosts/macbook/features.toml
+# Interactively enable/disable optional features in hosts/<host>/features.toml
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-FEATURES="$ROOT/hosts/macbook/features.toml"
+HOST="${DOTFILES_HOST:-macbook}"
+FEATURES="$ROOT/hosts/$HOST/features.toml"
+
+KNOWN_FEATURES=(ollama research)
 
 usage() {
   cat <<EOF
 Usage: $(basename "$0") <enable|disable|status> [feature]
 
+Host: $HOST (set DOTFILES_HOST for another machine)
+Features file: $FEATURES
+
 Features:
-  ollama   Local LLM runtime + VS Code Continue (large models; needs rebuild)
+  ollama     Local LLM runtime + VS Code Continue (large models; needs rebuild)
+  research   TeX Live / R / Quarto / RStudio (heavy; disable on weaker machines)
 
 Examples:
   $(basename "$0") status
   $(basename "$0") enable ollama
-  $(basename "$0") disable ollama
+  $(basename "$0") disable research
 EOF
 }
 
@@ -62,13 +69,21 @@ ask_confirm() {
   [[ "$reply" =~ ^[Yy]$ ]]
 }
 
+if [[ ! -f "$FEATURES" ]]; then
+  echo "No features file for host '$HOST' at $FEATURES" >&2
+  echo "Create hosts/$HOST/ (copy from macbook) and register it in flake.nix." >&2
+  exit 1
+fi
+
 cmd="${1:-}"
 feature="${2:-ollama}"
 
 case "$cmd" in
   status)
     echo "Feature flags ($FEATURES):"
-    echo "  ollama.enabled = $(get_enabled ollama)"
+    for f in "${KNOWN_FEATURES[@]}"; do
+      echo "  $f.enabled = $(get_enabled "$f")"
+    done
     ;;
   enable)
     current="$(get_enabled "$feature" || true)"
@@ -90,6 +105,14 @@ Enable Ollama?
   - Tuned for M5 Max / 128GB unified memory.
 EOF
         ;;
+      research)
+        cat <<'EOF'
+Enable research stack?
+  - home-manager: just, watchexec, sqlite, duckdb, quarto, pandoc, R, radian, texliveFull
+  - Homebrew cask: rstudio (+ Dock pin on hosts that declare it)
+  - texliveFull is a large download
+EOF
+        ;;
       *)
         echo "Unknown feature: $feature" >&2
         usage
@@ -98,15 +121,23 @@ EOF
     esac
     if ! ask_confirm "Write enabled = true for [$feature]?"; then
       echo "Aborted."
-      exit 1
+      exit 0
     fi
     set_enabled "$feature" true
     echo "Enabled [$feature]. Run: rebuild"
     ;;
   disable)
+    case "$feature" in
+      ollama | research) ;;
+      *)
+        echo "Unknown feature: $feature" >&2
+        usage
+        exit 1
+        ;;
+    esac
     if ! ask_confirm "Disable [$feature]?"; then
       echo "Aborted."
-      exit 1
+      exit 0
     fi
     set_enabled "$feature" false
     echo "Disabled [$feature]. Run: rebuild"

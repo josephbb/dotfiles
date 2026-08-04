@@ -1,5 +1,6 @@
 # Optional machine features. Toggle with `feature-enable` / `feature-disable`, then `rebuild`.
 # Nix cannot interactively ask during rebuild — these flags are the source of truth.
+# Each host has its own copy under hosts/<name>/features.toml.
 
 [ollama]
 enabled = true
@@ -8,3 +9,8 @@ enabled = true
 #   llama3.3:70b-instruct-q4_K_M
 #   qwen3-coder:30b-a3b-q8_0
 #   qwen2.5-coder:7b-base-q4_K_M
+
+# TeX Live, R/radian, Quarto, pandoc, just, duckdb/sqlite, RStudio cask + Dock pin.
+# Disable on weaker machines to skip the heavy research stack.
+[research]
+enabled = true

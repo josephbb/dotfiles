@@ -39,9 +39,10 @@ Declarative macOS setup for Joe’s machine via **[nix-darwin](https://github.co
 - **New Mac in an afternoon** — Determinate Nix + clone + `darwin-rebuild switch` restores CLI, shell, fonts, Dock, VS Code extensions, and apps.
 - **Reproducible** — versions pinned in [`flake.lock`](flake.lock); not a drifting pile of brew installs.
 - **Clear split**
-  - **nix-darwin** — Homebrew casks, fonts, Dock/Finder, folder layout ([`hosts/macbook/`](hosts/macbook/))
+  - **nix-darwin** — Homebrew casks, fonts, Dock/Finder, folder layout ([`hosts/`](hosts/); shared bits in [`hosts/common/`](hosts/common/))
   - **home-manager** — PATH packages, zsh, git, editors, secrets ([`home/`](home/))
   - **Project flakes + uv** — per-repo science stacks, not one global Python
+- **Multi-host ready** — each machine is `hosts/<name>/` + `darwinConfigurations.<name>`; heavy research/Ollama are per-host feature flags
 - **Research-shaped** — `~/Projects`, Proton-backed `~/Datasets/{raw,derived}`, local `scratch`, TeX Live, Zotero → bib, no conda.
 - **Secrets stay encrypted** — API keys via [agenix](https://github.com/ryantm/agenix); Apple/Proton/`gh auth` stay interactive.
 
@@ -63,18 +64,19 @@ sudo darwin-rebuild switch --flake ~/dotfiles#macbook
 
 [`scripts/rebuild.sh`](scripts/rebuild.sh) then runs safe cleanup: `brew cleanup`, nix GC, store optimise, and `ollama prune` if Ollama is present (**does not** pull models).
 
-Toggle optional features: `feature status` · `feature-enable ollama` · `feature-disable ollama` ([`scripts/feature.sh`](scripts/feature.sh)).
+Toggle optional features: `feature status` · `feature-enable ollama` · `feature-disable research` ([`scripts/feature.sh`](scripts/feature.sh)). Use `DOTFILES_HOST=<name>` when managing a non-default host.
 
 ---
 
 ## Repo layout
 
 ```text
-flake.nix                 # inputs, darwinConfigurations.macbook, templates
-hosts/macbook/            # nix-darwin: casks, fonts, Dock, features.toml, projects.toml
-home/                     # home-manager modules
+flake.nix                 # inputs, mkDarwin helper, templates
+hosts/common/             # shared nix-darwin: fonts, Finder, Datasets dirs
+hosts/macbook/            # this machine: casks, Dock, features.toml, projects.toml
+home/                     # home-manager modules (shared; gated by features)
   packages.nix            # general CLI
-  research.nix            # R / Quarto / TeX / just / duckdb / …
+  research.nix            # R / Quarto / TeX / just / duckdb / … ([research] feature)
   secrets.nix             # agenix wiring
   shell.nix               # zsh, starship, fzf, zoxide, tmux, Ghostty
   git.nix                 # git + gh + delta
@@ -86,6 +88,8 @@ templates/                # scratch · bayes · openalex · r — see templates/
 scripts/                  # rebuild, feature, ollama-setup, ssh-key-backup
 keychron/                 # keyboard profile backup only
 ```
+
+**Add another Mac:** copy `hosts/macbook` → `hosts/<name>`, set `[research]` / `[ollama]` in that host’s `features.toml`, trim casks/Dock as needed, register `<name> = mkDarwin "<name>";` in [`flake.nix`](flake.nix). Rebuild with `DOTFILES_HOST=<name> rebuild`.
 
 Default branch: **`main`**.
 
@@ -110,7 +114,7 @@ Declared in [`hosts/macbook/default.nix`](hosts/macbook/default.nix):
 | [Proton Pass](https://proton.me/pass) | Password manager |
 | [Obsidian](https://obsidian.md/) | Notes / PKM |
 | [Zotero](https://www.zotero.org/) | Reference manager |
-| [RStudio](https://posit.co/products/open-source/rstudio/) | R IDE |
+| [RStudio](https://posit.co/products/open-source/rstudio/) | R IDE — **only if** `[research] enabled` |
 | [Zoom](https://zoom.us/) | Meetings |
 | Signal, TIDAL | Chat / music |
 | [AnkerWork](https://us.ankerwork.com/) | Webcam / mic accessory software |
@@ -118,7 +122,7 @@ Declared in [`hosts/macbook/default.nix`](hosts/macbook/default.nix):
 
 ### Dock
 
-Pinned (rebuild replaces the list): Firefox, Mail, Calendar, Ghostty, VS Code, Obsidian, RStudio, Messages, Signal, Zoom, TIDAL, System Settings.
+Pinned (rebuild replaces the list): Firefox, Mail, Calendar, Ghostty, VS Code, Obsidian, Zotero, RStudio, Messages, Signal, Zoom, TIDAL, System Settings.
 
 ### Shell & CLI
 
@@ -193,6 +197,7 @@ Declared in [`home/shell.nix`](home/shell.nix) (plus Zotero / secrets / Ollama m
 | `colima-start` | Start Docker VM (4 CPU / 8 GB / 60 GB disk) |
 | `zot` / `zot-bib` / `zot-plugins` | Zotero helpers |
 | `openalex-load` / `openalex-show-path` | Load / show OpenAlex env file |
+| `overleaf-load` / `overleaf-show-path` | Load / show Overleaf Git token env |
 | `ollama-setup` / `status` / `pull-defaults` / `prune` | Local LLM helpers (when enabled) |
 
 Oh My Zsh also adds many short git aliases (`gst`, `gco`, `gd`, …). List with: `alias | rg '^g'`.
@@ -344,7 +349,8 @@ Encrypted files in git; decrypted at activation with `~/.ssh/id_ed25519`.
 |---|---|
 | [`secrets.nix`](secrets.nix) | Recipients (SSH public keys) |
 | [`secrets/openalex.env.age`](secrets/openalex.env.age) | OpenAlex credentials |
-| [`home/secrets.nix`](home/secrets.nix) | Wire secrets → env / aliases |
+| [`secrets/overleaf-git.env.age`](secrets/overleaf-git.env.age) | Overleaf Git integration token |
+| [`home/secrets.nix`](home/secrets.nix) | Wire secrets → env / aliases / Overleaf credential helper |
 
 **New / second machine (preferred — rekey):** add the new host’s public key to `secrets.nix` → on an old machine `agenix --rekey` → commit → on the new machine restore private key → `rebuild`.
 
