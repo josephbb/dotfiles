@@ -1,0 +1,12 @@
+# Optional machine features. Toggle with `feature-enable` / `feature-disable`, then `rebuild`.
+# Nix cannot interactively ask during rebuild — these flags are the source of truth.
+# Each host has its own copy under hosts/<name>/features.toml.
+#
+# Joe's MacBook Air: full research stack, no local LLMs (too heavy for this machine).
+
+[ollama]
+enabled = false
+
+# TeX Live, R/radian, Quarto, pandoc, just, duckdb/sqlite, RStudio cask + Dock pin.
+[research]
+enabled = true

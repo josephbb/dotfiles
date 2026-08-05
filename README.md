@@ -73,7 +73,8 @@ Toggle optional features: `feature status` · `feature-enable ollama` · `featur
 ```text
 flake.nix                 # inputs, mkDarwin helper, templates
 hosts/common/             # shared nix-darwin: fonts, Finder, Datasets dirs
-hosts/macbook/            # this machine: casks, Dock, features.toml, projects.toml
+hosts/macbook/            # Pro: casks, Dock, features.toml, projects.toml (Ollama on)
+hosts/JoesMacbookAir/     # Air: same apps/research; Ollama off
 home/                     # home-manager modules (shared; gated by features)
   packages.nix            # general CLI
   research.nix            # R / Quarto / TeX / just / duckdb / … ([research] feature)
@@ -89,7 +90,9 @@ scripts/                  # rebuild, feature, ollama-setup, ssh-key-backup
 keychron/                 # keyboard profile backup only
 ```
 
-**Add another Mac:** copy `hosts/macbook` → `hosts/<name>`, set `[research]` / `[ollama]` in that host’s `features.toml`, trim casks/Dock as needed, register `<name> = mkDarwin "<name>";` in [`flake.nix`](flake.nix). Rebuild with `DOTFILES_HOST=<name> rebuild`.
+**Hosts:** `macbook` (Pro, Ollama on) · `JoesMacbookAir` (Air, Ollama off; research/TeX/RStudio kept). Rebuild the Air with `DOTFILES_HOST=JoesMacbookAir rebuild` or `sudo darwin-rebuild switch --flake ~/dotfiles#JoesMacbookAir`.
+
+**Add another Mac:** copy an existing `hosts/<name>` → `hosts/<new>`, set `[research]` / `[ollama]` in that host’s `features.toml`, trim casks/Dock as needed, register `<new> = mkDarwin "<new>";` in [`flake.nix`](flake.nix).
 
 Default branch: **`main`**.
 
@@ -370,7 +373,7 @@ Cask + config in [`home/zotero.nix`](home/zotero.nix). Firefox Connector via [`h
 | `~/References/library.bib` | Canonical Better BibTeX target (`ZOTERO_BIB`) |
 | `zot` / `zot-bib` / `zot-plugins` | Open / check bib / list managed plugins |
 
-**Plugins (auto on rebuild):** [Better BibTeX](https://github.com/retorquere/zotero-better-bibtex), [Zoplicate](https://github.com/ChenglongMa/zoplicate), [Better Notes](https://github.com/windingwind/zotero-better-notes), [ZotMoov](https://github.com/wileyyugioh/zotmoov), [Actions & Tags](https://github.com/windingwind/zotero-actions-tags).
+**Plugins (auto on rebuild):** [Better BibTeX](https://github.com/retorquere/zotero-better-bibtex), [Zoplicate](https://github.com/ChenglongMa/zoplicate), [Better Notes](https://github.com/windingwind/zotero-better-notes), [ZotMoov](https://github.com/wileyyugioh/zotmoov), [Actions & Tags](https://github.com/windingwind/zotero-actions-tags). After rebuild, fully quit and reopen Zotero so sideloaded XPIs register (installer clears the extension scan cache and enables them).
 
 **One-time:** open Zotero once if brand new → `rebuild` for plugins → export Better BibLaTeX to `~/References/library.bib` with **Keep updated**. Use Zotero’s own sync for the library; don’t put the live Zotero data dir on Proton Drive.
 

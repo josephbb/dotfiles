@@ -57,8 +57,7 @@
     {
       darwinConfigurations = {
         macbook = mkDarwin "macbook";
-        # Add another host: copy hosts/macbook → hosts/<name>, tune features.toml / casks, then:
-        #   <name> = mkDarwin "<name>";
+        JoesMacbookAir = mkDarwin "JoesMacbookAir";
       };
 
       # Project starters: nix flake new -t ~/dotfiles#<name> ~/Projects/...

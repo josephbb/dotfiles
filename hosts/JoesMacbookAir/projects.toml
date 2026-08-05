@@ -1,0 +1,21 @@
+# Repos to auto-clone into ~/Projects during rebuild.
+# Safety rule: if the destination directory already exists, it is never modified.
+#
+# Example:
+# [[projects]]
+# name = "my-analysis"
+# url = "git@github.com:your-org/my-analysis.git"
+# dest = "my-analysis" # optional; defaults to name
+# enabled = true       # optional; defaults to true
+
+[[projects]]
+name = "dotfiles"
+url = "git@github.com:josephbb/dotfiles.git"
+dest = "dotfiles"
+enabled = false
+
+[[projects]]
+name = "personal-website"
+url = "git@github.com:josephbb/josephbb.github.io.git"
+dest = "josephbb.github.io"
+enabled = true
