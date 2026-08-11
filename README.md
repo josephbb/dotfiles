@@ -117,7 +117,7 @@ Declared in [`hosts/macbook/default.nix`](hosts/macbook/default.nix):
 | [Proton Pass](https://proton.me/pass) | Password manager |
 | [Obsidian](https://obsidian.md/) | Notes / PKM |
 | [Zotero](https://www.zotero.org/) | Reference manager |
-| [RStudio](https://posit.co/products/open-source/rstudio/) | R IDE — **only if** `[research] enabled` |
+| [RStudio](https://posit.co/products/open-source/rstudio/) | R IDE — **only if** `[research] enabled` (with CRAN `r-app`) |
 | [Zoom](https://zoom.us/) | Meetings |
 | Signal, TIDAL | Chat / music |
 | [AnkerWork](https://us.ankerwork.com/) | Webcam / mic accessory software |
@@ -153,7 +153,7 @@ From [`home/research.nix`](home/research.nix):
 | `just` | Task runner (simpler than Make) |
 | `watchexec` | Re-run commands on file change |
 | `sqlite` / `duckdb` | Quick tabular analysis |
-| `R` + `radian` | R + nicer REPL |
+| `R` + `radian` | nixpkgs CLI R + nicer REPL (RStudio uses CRAN `r-app`) |
 | `quarto` / `pandoc` | Publishing |
 | `texliveFull` | Full TeX Live (`latexmk`, pdflatex, bibtex, …) |
 
@@ -170,7 +170,7 @@ From [`home/research.nix`](home/research.nix):
 | Blog | Astro, MDX, Prettier |
 | Theme | Gruvbox Material Dark (always) |
 
-**RStudio** — brew cask; nixpkgs `R` via `/usr/local/bin/{R,Rscript}` symlinks (GUI discovery) plus `RSTUDIO_WHICH_R`. Prefer `radian` in the terminal; `rstudio` opens the app.
+**RStudio** — brew casks `r-app` (CRAN `R.framework`) + `rstudio`. Terminal `R`/`radian` stay nixpkgs; prefer `radian` in the shell; `rstudio` opens the GUI.
 
 **Cursor** — not managed by this flake (install from [cursor.com](https://www.cursor.com/) if you want it).
 
@@ -296,7 +296,7 @@ nix flake new -t ~/dotfiles#r        ~/Projects/tidyverse-scratch
 | `R` | Stock R |
 | `quarto preview` | Quarto projects |
 | `latexmk -pdf paper.tex` | TeX Live via `texliveFull` |
-| `rstudio` / RStudio | GUI; Dock pin (`/usr/local/bin/R` → nix profile) |
+| `rstudio` / RStudio | GUI; Dock pin (needs brew `r-app` / CRAN framework) |
 | `nix flake new -t ~/dotfiles#r …` | Project stub with renv |
 
 Bib: LaTeX Workshop reads `~/References/` ([Zotero](#zotero)).

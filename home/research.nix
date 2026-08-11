@@ -11,6 +11,7 @@
     duckdb
 
     # Docs / R / publishing
+    # Terminal R stays nixpkgs (radian, renv flakes). RStudio uses CRAN via brew cask r-app.
     quarto
     pandoc
     R
@@ -20,13 +21,7 @@
     texliveFull
   ];
 
-  # Terminal / `open --env` launches. Dock/Finder need the /usr/local/bin symlink
-  # from hosts/common (RStudio ignores shell env when opened from the GUI).
-  home.sessionVariables = {
-    RSTUDIO_WHICH_R = "${pkgs.R}/bin/R";
-  };
-
   programs.zsh.shellAliases = {
-    rstudio = "open -a RStudio --env RSTUDIO_WHICH_R=\"$RSTUDIO_WHICH_R\"";
+    rstudio = "open -a RStudio";
   };
 }

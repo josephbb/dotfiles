@@ -60,6 +60,7 @@ in
         "ankerwork"
       ]
       ++ lib.optionals researchEnabled [
+        "r-app" # CRAN binary → R.framework (what RStudio expects)
         "rstudio"
       ]
       ++ lib.optionals ollamaEnabled [
