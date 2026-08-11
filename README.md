@@ -170,7 +170,7 @@ From [`home/research.nix`](home/research.nix):
 | Blog | Astro, MDX, Prettier |
 | Theme | Gruvbox Material Dark (always) |
 
-**RStudio** — brew cask; uses nixpkgs `R` on PATH. Prefer `radian` in the terminal.
+**RStudio** — brew cask; nixpkgs `R` via `/usr/local/bin/{R,Rscript}` symlinks (GUI discovery) plus `RSTUDIO_WHICH_R`. Prefer `radian` in the terminal; `rstudio` opens the app.
 
 **Cursor** — not managed by this flake (install from [cursor.com](https://www.cursor.com/) if you want it).
 
@@ -296,7 +296,7 @@ nix flake new -t ~/dotfiles#r        ~/Projects/tidyverse-scratch
 | `R` | Stock R |
 | `quarto preview` | Quarto projects |
 | `latexmk -pdf paper.tex` | TeX Live via `texliveFull` |
-| RStudio | GUI; Dock pin |
+| `rstudio` / RStudio | GUI; Dock pin (`/usr/local/bin/R` → nix profile) |
 | `nix flake new -t ~/dotfiles#r …` | Project stub with renv |
 
 Bib: LaTeX Workshop reads `~/References/` ([Zotero](#zotero)).

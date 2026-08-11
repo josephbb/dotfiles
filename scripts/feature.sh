@@ -109,7 +109,7 @@ EOF
         cat <<'EOF'
 Enable research stack?
   - home-manager: just, watchexec, sqlite, duckdb, quarto, pandoc, R, radian, texliveFull
-  - Homebrew cask: rstudio (+ Dock pin on hosts that declare it)
+  - Homebrew cask: rstudio (+ Dock pin; /usr/local/bin/R → nix profile)
   - texliveFull is a large download
 EOF
         ;;

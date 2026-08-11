@@ -2,8 +2,12 @@
   lib,
   pkgs,
   username,
+  features,
   ...
 }:
+let
+  researchEnabled = features.research.enabled or true;
+in
 {
   # Determinate Nix manages the nix installation; don't let nix-darwin clobber it.
   nix.enable = false;
@@ -83,4 +87,35 @@
       sudo -u ${username} /opt/homebrew/bin/defaultbrowser firefox || true
     fi
   '';
+
+  # RStudio Desktop (Electron) ignores shell PATH / RSTUDIO_WHICH_R when launched from
+  # Dock/Finder. It only scans /usr/bin, /usr/local/bin, /opt/local/bin, and the CRAN
+  # framework. Point those names at the home-manager profile R.
+  system.activationScripts.linkNixRForRStudio.text =
+    let
+      profileBin = "/etc/profiles/per-user/${username}/bin";
+    in
+    if researchEnabled then
+      ''
+        echo "RStudio: linking nix R into /usr/local/bin"
+        mkdir -p /usr/local/bin
+        if [ -x "${profileBin}/R" ]; then
+          ln -sfn "${profileBin}/R" /usr/local/bin/R
+          ln -sfn "${profileBin}/Rscript" /usr/local/bin/Rscript
+        else
+          echo "RStudio: ${profileBin}/R missing (is research HM profile built?)" >&2
+        fi
+      ''
+    else
+      ''
+        for cmd in R Rscript; do
+          link=/usr/local/bin/$cmd
+          if [ -L "$link" ]; then
+            target=$(readlink "$link" || true)
+            case "$target" in
+              /etc/profiles/per-user/${username}/bin/*) rm -f "$link" ;;
+            esac
+          fi
+        done
+      '';
 }
