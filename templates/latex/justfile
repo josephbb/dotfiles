@@ -1,0 +1,76 @@
+sync:
+	python3 scripts/sync_cv.py
+
+pdf: sync
+	python3 scripts/build_selected.py
+
+cv: sync
+	latexmk -pdf -cd cv/cv.tex
+
+research: sync
+	latexmk -pdf -cd statements/research-statement.tex
+
+teaching: sync
+	latexmk -pdf -cd statements/teaching-statement.tex
+
+diversity: sync
+	latexmk -pdf -cd statements/diversity-statement.tex
+
+mentoring: sync
+	latexmk -pdf -cd statements/mentoring-statement.tex
+
+# --- applications (per university) ---
+
+status:
+	python3 scripts/apps.py list
+
+status-filter STATUS:
+	python3 scripts/apps.py list --status {{STATUS}}
+
+# just app-new "University of Washington" Biology --slug uw-biology --deadline 2026-10-15 --portal 'https://…'
+app-new *ARGS:
+	python3 scripts/apps.py new {{ARGS}}
+
+app-status SLUG STATUS:
+	python3 scripts/apps.py status {{SLUG}} {{STATUS}}
+
+app-show SLUG:
+	python3 scripts/apps.py show {{SLUG}}
+
+# just app-set uw-biology portal 'https://…'
+app-set SLUG FIELD VALUE:
+	python3 scripts/apps.py set {{SLUG}} {{FIELD}} {{VALUE}}
+
+# just app-requires uw-biology cover_letter,cv,research_statement,teaching_statement,references
+app-requires SLUG MATERIALS:
+	python3 scripts/apps.py requires {{SLUG}} {{MATERIALS}}
+
+ship SLUG: sync
+	python3 scripts/apps.py ship {{SLUG}}
+
+# Usage: just letter uw-biology
+letter INST: sync
+	latexmk -pdf -cd letters/{{INST}}.tex
+
+# Prefer: just app-new … (tracks the application). Raw letter copy:
+new-letter SLUG: sync
+	#!/usr/bin/env bash
+	set -euo pipefail
+	dest="letters/{{SLUG}}.tex"
+	if [[ -e "$dest" ]]; then
+	  echo "Already exists: $dest" >&2
+	  exit 1
+	fi
+	cp letters/_template.tex "$dest"
+	echo "Created $dest — also add a row: just app-new \"Institution\" Dept --slug {{SLUG}}"
+
+clean:
+	#!/usr/bin/env bash
+	set -euo pipefail
+	shopt -s nullglob
+	for f in cv/*.tex statements/*.tex letters/*.tex; do
+	  [[ "$(basename "$f")" == _template.tex ]] && continue
+	  latexmk -C -cd "$f" || true
+	done
+
+rebuild: clean pdf

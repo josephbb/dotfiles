@@ -1,0 +1,51 @@
+# Academic job cycle — edit me first after `nix flake new`.
+
+[applicant]
+name = "Joseph Bak-Coleman"
+email = "jbakcoleman@gmail.com"
+homepage = "https://josephbb.github.io"
+# Optional extras for letters / header lines:
+# affiliation = "Columbia University"
+# phone = ""
+
+# Curriculum vitae: you maintain this elsewhere. Point at a local .tex
+# OR pull a file from GitHub. Run `just sync` (also runs before `just cv`).
+[cv]
+# Local file or directory (directory → use main .tex named cv.tex / main.tex, or set file)
+path = ""
+# path = "~/Projects/cv/cv.tex"
+# path = "~/Projects/cv"          # expects cv.tex inside
+
+# GitHub (used when path is empty)
+github_repo = ""
+# github_repo = "josephbb/cv"
+github_path = "cv.tex"
+github_ref = "main"
+# github_token env (optional): GITHUB_TOKEN for private repos via HTTPS
+
+# Which statement templates to treat as part of `just pdf`.
+# Cover letters are always per-job under letters/ (not toggled here).
+[documents]
+research_statement = true
+teaching_statement = true
+diversity_statement = true
+mentoring_statement = false
+
+# Soft targets for feedback (pages). Agents/humans use these as guide rails.
+[length_pages]
+research_statement = "2-3"
+teaching_statement = "1-2"
+diversity_statement = "1-2"
+mentoring_statement = "1-2"
+cover_letter = "1"
+
+# Default materials checklist for `just app-new` (override per app in applications.toml).
+[defaults]
+requires = [
+  "cover_letter",
+  "cv",
+  "research_statement",
+  "teaching_statement",
+  "diversity_statement",
+  "references",
+]

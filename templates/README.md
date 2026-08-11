@@ -14,6 +14,7 @@ nix flake new -t ~/dotfiles#<name> ~/Projects/<dir>
 | [`bayes`](bayes/) | PyMC / NumPyro / CmdStanPy + ArviZ / Bambi / Kulprit | Bayesian modeling |
 | [`openalex`](openalex/) | Harvest → Parquet | OpenAlex datasets under `~/Datasets` |
 | [`r`](r/) | renv + Quarto | Occasional R / tidyverse |
+| [`latex`](latex/) | Academic job packet | External CV + statement/letter templates (`config.toml`) |
 
 Former `#python` → use **`#bayes`**.
 
@@ -40,7 +41,16 @@ renv::snapshot()
 quarto preview analysis.qmd
 ```
 
-RStudio is already on the machine (Homebrew cask). Large data stays in `~/Datasets`, not the repo.
+**LaTeX / academic jobs** (`latex`):
+
+```bash
+cd ~/Projects/<dir>
+direnv allow
+just pdf              # CV + statements
+# just letter INST=example
+```
+
+You own the prose; Cursor helps with formatting, structure, and feedback (`AGENTS.md`). RStudio is on the machine (Homebrew). TeX Live is machine-level (`texliveFull`). Large data stays in `~/Datasets`, not the repo.
 
 ## Shared conventions (Python)
 

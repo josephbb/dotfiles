@@ -1,0 +1,31 @@
+# Per-university / per-search tracker for this cycle.
+# Status: planned → in_progress → done → shipped (also: interview | closed)
+# When: timing = deadline | rolling | open_until_filled | review_begins | unknown
+#       deadline= is optional (many ads are rolling / open until filled).
+#
+# Create:  just app-new "University of Washington" Biology --slug uw-biology --timing rolling --portal 'https://…'
+#          just app-new "Other U" Biology --slug other --deadline 2026-10-15
+# Board:   just status
+# Detail:  just app-show uw-biology
+
+[[applications]]
+slug = "example"
+institution = "Example University"
+department = "Department of Example"
+position = "Assistant Professor"
+requisition = ""
+status = "planned"
+timing = "rolling"
+deadline = ""
+review_begins = ""
+timezone = ""
+portal = "https://example.edu/jobs/apply/123"
+ad_url = "https://example.edu/jobs/123"
+contact = "search@example.edu"
+interfolio = ""
+letter = "letters/example.tex"
+requires = [ "cover_letter", "cv", "research_statement", "teaching_statement", "diversity_statement", "references" ]
+upload = { cover_letter = "letters/example.pdf", cv = "cv/cv.pdf", research_statement = "statements/research-statement.pdf", teaching_statement = "statements/teaching-statement.pdf", diversity_statement = "statements/diversity-statement.pdf", references = "(Interfolio / portal — not built here)" }
+sources = {}
+notes = "Replace or delete after `just app-new …`. timing=rolling → no hard deadline."
+shipped_on = ""

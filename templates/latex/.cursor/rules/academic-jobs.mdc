@@ -1,0 +1,16 @@
+---
+description: Academic job cycle — portals, deadlines, requires, upload map
+globs:
+  - "**/*.tex"
+  - "**/config.toml"
+  - "**/applications.toml"
+  - "**/justfile"
+  - "**/AGENTS.md"
+alwaysApply: false
+---
+
+Academic job cycle. CV is external. Statements are shared; letters are per-university.
+
+Each applications.toml row should capture where to apply (portal/ad_url), when (optional — timing/deadline/rolling), what is required (requires), and which files map to portal slots (upload). Use just app-show for the checklist.
+
+Help with LaTeX and feedback. Do not invent CV facts or mark shipped unless asked.

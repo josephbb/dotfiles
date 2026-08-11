@@ -1,0 +1,32 @@
+# LaTeX / latexmk
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.run.xml
+*.synctex.gz
+*.toc
+*.lof
+*.lot
+*.nav
+*.snm
+*.vrb
+*.xdv
+*-blx.bib
+*.pdf
+
+# Synced / generated
+.cache/
+cv/*
+!cv/README.md
+
+# Editor / OS
+.DS_Store
+.direnv/
+*.swp
+*~
+__pycache__/

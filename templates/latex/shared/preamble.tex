@@ -1,0 +1,34 @@
+% Shared packages / layout for statements and letters.
+% CV is external (see config.toml); do not assume its class here.
+
+\usepackage[margin=1in]{geometry}
+\usepackage{microtype}
+\usepackage{setspace}
+\setstretch{1.15}
+
+\usepackage{booktabs}
+\usepackage{enumitem}
+\setlist{nosep,leftmargin=*}
+
+\usepackage{graphicx}
+\graphicspath{{../figures/}{figures/}}
+
+\usepackage{xcolor}
+\usepackage{titlesec}
+\titleformat{\section}{\large\bfseries}{\thesection}{1em}{}
+\titlespacing*{\section}{0pt}{1.25em}{0.5em}
+
+\usepackage[
+  backend=biber,
+  style=authoryear,
+  sorting=nyt,
+  maxbibnames=99,
+  doi=false,
+  isbn=false,
+  url=false,
+]{biblatex}
+
+\usepackage[colorlinks=true,allcolors=blue]{hyperref}
+\usepackage{etoolbox}
+
+\input{../shared/identity.tex}

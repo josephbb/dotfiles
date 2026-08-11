@@ -78,6 +78,10 @@
           path = ./templates/r;
           description = "R + renv + Quarto stub";
         };
+        latex = {
+          path = ./templates/latex;
+          description = "Academic job cycle (CV sync, statements, per-uni letters + status)";
+        };
         default = self.templates.scratch;
       };
 

@@ -1,0 +1,45 @@
+\documentclass[11pt,letterpaper]{article}
+\input{../shared/preamble.tex}
+
+% Copy to letters/<institution-slug>.tex for each application.
+%   cp letters/_template.tex letters/uw-biology.tex
+%   just letter uw-biology
+% Soft target: one page (config.toml [length_pages].cover_letter).
+
+\usepackage{parskip}
+
+\begin{document}
+\thispagestyle{empty}
+
+\noindent
+\docauthor\\
+\ifdefempty{\docaffiliation}{}{\docaffiliation\\}
+\docemail\\
+\ifdefempty{\docphone}{}{\docphone\\}
+\dochomepage\\[1em]
+\today
+
+\vspace{1em}
+
+\noindent
+Search Committee\\
+% Department of \ldots\\
+% University of \ldots\\
+% City, ST ZIP
+
+\vspace{1em}
+
+\noindent Dear Members of the Search Committee,
+
+%% 1. Position + how you heard of it / req number
+%% 2. Why this department (people, programs, students — specifics)
+%% 3. Research bridge (pointer to research statement; do not paste it)
+%% 4. Teaching / mentoring bridge
+%% 5. Close: enclosed materials, interview interest, thanks
+
+\vspace{1em}
+
+\noindent Sincerely,\\[2em]
+\docauthor
+
+\end{document}
