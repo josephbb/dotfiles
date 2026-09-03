@@ -1,11 +1,9 @@
-# Shared VS Code user settings (home/vscode.nix).
+# Bootstrap defaults for the user-owned VS Code settings file.
 { homeDirectory }:
 {
   # Always dark — match Ghostty (does not follow macOS appearance)
   "window.autoDetectColorScheme" = false;
-  "workbench.colorTheme" = "Gruvbox Material Dark";
-  "gruvboxMaterial.darkContrast" = "hard";
-  "gruvboxMaterial.italicComments" = true;
+  "workbench.colorTheme" = "Gruvbox Dark Hard";
 
   "editor.fontFamily" = "IosevkaTerm Nerd Font, Menlo, Monaco, 'Courier New', monospace";
   "editor.fontSize" = 13;

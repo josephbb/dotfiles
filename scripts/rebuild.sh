@@ -17,9 +17,10 @@ Host: $HOST (set DOTFILES_HOST to target another hosts/<name> config)
 Runs:
   1. sudo darwin-rebuild switch --flake $FLAKE …
   2. brew cleanup -s
-  3. sudo nix-collect-garbage -d
-  4. nix store optimise
-  5. ollama prune (if Ollama is installed) — retired tags + partial blobs only
+  3. AWS CLI v2 (official install.sh → ~/.local) — install or update
+  4. sudo nix-collect-garbage -d
+  5. nix store optimise
+  6. ollama prune (if Ollama is installed) — retired tags + partial blobs only
      (does NOT pull models; use ollama-setup for that)
 
 Extra args are forwarded to darwin-rebuild (e.g. --show-trace).
@@ -41,6 +42,11 @@ if command -v brew >/dev/null 2>&1; then
 else
   echo "brew not found; skipping"
 fi
+
+echo
+echo "==> AWS CLI v2 (official installer)"
+# User-local install: ~/.local/share/aws-cli + symlinks in ~/.local/bin
+curl -fsSL https://awscli.amazonaws.com/v2/install.sh | bash
 
 echo
 echo "==> nix-collect-garbage -d"

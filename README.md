@@ -62,7 +62,7 @@ Or:
 sudo darwin-rebuild switch --flake ~/dotfiles#macbook
 ```
 
-[`scripts/rebuild.sh`](scripts/rebuild.sh) then runs safe cleanup: `brew cleanup`, nix GC, store optimise, and `ollama prune` if Ollama is present (**does not** pull models).
+[`scripts/rebuild.sh`](scripts/rebuild.sh) then runs safe cleanup: `brew cleanup`, installs/updates **AWS CLI v2** via the official `install.sh` (user-local under `~/.local`), nix GC, store optimise, and `ollama prune` if Ollama is present (**does not** pull models).
 
 Toggle optional features: `feature status` · `feature-enable ollama` · `feature-disable research` ([`scripts/feature.sh`](scripts/feature.sh)). Use `DOTFILES_HOST=<name>` when managing a non-default host.
 
@@ -85,7 +85,7 @@ home/                     # home-manager modules (shared; gated by features)
   editor-settings.nix     # VS Code userSettings
 secrets/                  # encrypted .age files
 secrets.nix               # agenix recipients (SSH public keys)
-templates/                # scratch · bayes · openalex · r — see templates/README.md
+templates/                # scratch · bayes · openalex · r · latex — see templates/README.md
 scripts/                  # rebuild, feature, ollama-setup, ssh-key-backup
 keychron/                 # keyboard profile backup only
 ```
@@ -116,11 +116,13 @@ Declared in [`hosts/macbook/default.nix`](hosts/macbook/default.nix):
 | [Proton VPN](https://protonvpn.com/) | VPN |
 | [Proton Pass](https://proton.me/pass) | Password manager |
 | [Obsidian](https://obsidian.md/) | Notes / PKM |
+| [NetNewsWire](https://netnewswire.com/) | RSS reader — use iCloud sync for feeds across devices |
 | [Zotero](https://www.zotero.org/) | Reference manager |
 | [RStudio](https://posit.co/products/open-source/rstudio/) | R IDE — **only if** `[research] enabled` (with CRAN `r-app`) |
 | [Zoom](https://zoom.us/) | Meetings |
 | Signal, TIDAL | Chat / music |
 | [AnkerWork](https://us.ankerwork.com/) | Webcam / mic accessory software |
+| [Radix](https://tryradix.app) | Free disk space visualizer (DaisyDisk-style) |
 | Ollama | Local LLMs — **only if** `[ollama] enabled` |
 
 ### Dock
@@ -142,6 +144,7 @@ From [`home/packages.nix`](home/packages.nix) + [`home/shell.nix`](home/shell.ni
 | Databases | `postgresql` (`psql`, server binaries) |
 | Python tooling | `uv`, `direnv`, `nix-direnv` |
 | Nix | `nixfmt`, `nil` |
+| Cloud | `aws` (AWS CLI v2 via official installer on `rebuild`) |
 | Misc | `curl`, `wget`, `tldr`, `shellcheck`, `sl`, `agenix` |
 
 ### Research stack
@@ -168,7 +171,9 @@ From [`home/research.nix`](home/research.nix):
 | Docs / git | PR GitHub, Git History, Markdown All in One |
 | Papers | LaTeX Workshop, Code Spell Checker, LTeX |
 | Blog | Astro, MDX, Prettier |
-| Theme | Gruvbox Material Dark (always) |
+| Theme | Gruvbox Dark Hard (bootstrap default) |
+
+Nix seeds `settings.json` on first setup, then leaves it user-owned so VS Code Settings Sync can persist settings across machines. Edit [`home/editor-settings.nix`](home/editor-settings.nix) to change the bootstrap defaults; existing settings are not overwritten on rebuild.
 
 **RStudio** — brew casks `r-app` (CRAN `R.framework`) + `rstudio`. Terminal `R`/`radian` stay nixpkgs; prefer `radian` in the shell; `rstudio` opens the GUI.
 
@@ -179,7 +184,7 @@ From [`home/research.nix`](home/research.nix):
 | Where | Theme / font |
 |---|---|
 | Ghostty | Gruvbox Material Dark · **IosevkaTerm Nerd Font** 14 |
-| VS Code | Gruvbox Material Dark (hard contrast) · same font family 13 |
+| VS Code | Gruvbox Dark Hard · same font family 13 |
 | System font | `nerd-fonts.iosevka-term` via nix-darwin |
 
 ---
@@ -195,7 +200,7 @@ Declared in [`home/shell.nix`](home/shell.nix) (plus Zotero / secrets / Ollama m
 | `ls` / `ll` / `la` | `eza` (long + git column) |
 | `cat` | `bat` |
 | `g` | `git` |
-| `rebuild` | Apply flake + cleanup ([`scripts/rebuild.sh`](scripts/rebuild.sh)) |
+| `rebuild` | Apply flake + cleanup + AWS CLI install ([`scripts/rebuild.sh`](scripts/rebuild.sh)) |
 | `feature` / `feature-enable` / `feature-disable` | Optional features ([`features.toml`](hosts/macbook/features.toml)) |
 | `colima-start` | Start Docker VM (4 CPU / 8 GB / 60 GB disk) |
 | `zot` / `zot-bib` / `zot-plugins` | Zotero helpers |
@@ -284,9 +289,10 @@ nix flake new -t ~/dotfiles#scratch  ~/Projects/blog-note
 nix flake new -t ~/dotfiles#bayes    ~/Projects/my-model
 nix flake new -t ~/dotfiles#openalex ~/Projects/oa-industry-ties
 nix flake new -t ~/dotfiles#r        ~/Projects/tidyverse-scratch
+nix flake new -t ~/dotfiles#latex    ~/Projects/academic-job-2026
 ```
 
-`#scratch` is the **default**. Former `#python` → **`#bayes`**. After create: `direnv allow` + `uv sync` (or `renv::init()` for R).
+`#scratch` is the **default**. Former `#python` → **`#bayes`**. After create: `direnv allow` + `uv sync` (or `renv::init()` for R; `just pdf` for academic job LaTeX).
 
 ### R / Quarto / LaTeX
 
@@ -295,9 +301,10 @@ nix flake new -t ~/dotfiles#r        ~/Projects/tidyverse-scratch
 | `radian` | Preferred R console |
 | `R` | Stock R |
 | `quarto preview` | Quarto projects |
-| `latexmk -pdf paper.tex` | TeX Live via `texliveFull` |
+| `latexmk` / `just pdf` | TeX Live via `texliveFull` |
 | `rstudio` / RStudio | GUI; Dock pin (needs brew `r-app` / CRAN framework) |
 | `nix flake new -t ~/dotfiles#r …` | Project stub with renv |
+| `nix flake new -t ~/dotfiles#latex …` | Academic job packet (external CV + statement/letter templates) |
 
 Bib: LaTeX Workshop reads `~/References/` ([Zotero](#zotero)).
 
@@ -385,7 +392,7 @@ Cask + config in [`home/zotero.nix`](home/zotero.nix). Firefox Connector via [`h
 
 **Auto-clone** on rebuild ([`hosts/macbook/projects.toml`](hosts/macbook/projects.toml)): only if the destination does **not** exist. Currently: `josephbb.github.io` enabled; `dotfiles` listed but disabled.
 
-Flake starters: [`templates/README.md`](templates/README.md) (`scratch`, `bayes`, `openalex`, `r`).
+Flake starters: [`templates/README.md`](templates/README.md) (`scratch`, `bayes`, `openalex`, `r`, `latex`).
 
 ---
 
@@ -401,7 +408,7 @@ ollama-setup                 # start, pull defaults, prune retired
 | Role | Model |
 |---|---|
 | Primary coding / agent | `qwen3-coder-next` |
-| General / agent | `llama3.3:70b-instruct-q4_K_M` |
+| General / agent | `qwen3.8:27b` |
 | Faster coding alt | `qwen3-coder:30b-a3b-q8_0` |
 | Autocomplete | `qwen2.5-coder:7b-base-q4_K_M` |
 

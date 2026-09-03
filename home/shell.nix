@@ -1,5 +1,8 @@
 { pkgs, config, ... }:
 {
+  # Official AWS CLI install.sh puts `aws` here (see scripts/rebuild.sh).
+  home.sessionPath = [ "${config.home.homeDirectory}/.local/bin" ];
+
   programs.zsh = {
     enable = true;
     # Lock current behavior (zsh files in $HOME) before HM 26.05 default flip.

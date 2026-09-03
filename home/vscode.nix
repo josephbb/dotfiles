@@ -11,7 +11,8 @@ let
 in
 {
   # Homebrew still installs the GUI app (stable /Applications path for Dock).
-  # home-manager owns settings + extensions (shared Code user data).
+  # Home Manager owns extensions; VS Code owns the live settings file so
+  # Settings Sync can persist preferences across machines.
   programs.vscode = {
     enable = true;
     # Avoid a second competing update UI; brew owns the app binary.
@@ -53,12 +54,15 @@ in
         valentjn.vscode-ltex
 
         # Theme (nixpkgs — avoids Marketplace fetch / .obsolete fights)
-        sainnhe.gruvbox-material
+        jdinhlife.gruvbox
       ];
-
-      userSettings = editorSettings;
     };
   };
+
+  # Bootstrap defaults are kept in Nix, but the live settings file is left
+  # writable for VS Code and Settings Sync to manage.
+  home.file."Library/Application Support/Code/User/settings.nix-seed.json".text =
+    builtins.toJSON editorSettings;
 
   # VS Code marks HM-managed extensions obsolete when Marketplace installs collide.
   # Clear that file on activate so themes (and friends) stay loadable.
@@ -66,6 +70,25 @@ in
     obsolete="${config.home.homeDirectory}/.vscode/extensions/.obsolete"
     if [ -f "$obsolete" ]; then
       rm -f "$obsolete"
+    fi
+  '';
+
+  # Migrate the old Home Manager-managed symlink once, or seed a new install.
+  # After this, settings.json is intentionally unmanaged so Settings Sync and
+  # the VS Code UI can update it without being overwritten on rebuild.
+  home.activation.mutableVscodeSettings = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+    settings="${config.home.homeDirectory}/Library/Application Support/Code/User/settings.json"
+    seed="${config.home.homeDirectory}/Library/Application Support/Code/User/settings.nix-seed.json"
+    if [ -L "$settings" ]; then
+      echo "VS Code: migrating settings.json to a user-owned file"
+      target="$(${pkgs.coreutils}/bin/readlink "$settings")"
+      ${pkgs.coreutils}/bin/rm -f "$settings"
+      ${pkgs.coreutils}/bin/cp "$target" "$settings"
+      ${pkgs.coreutils}/bin/chmod u+w "$settings"
+    elif [ ! -e "$settings" ]; then
+      echo "VS Code: creating settings.json from Nix seed"
+      ${pkgs.coreutils}/bin/cp "$seed" "$settings"
+      ${pkgs.coreutils}/bin/chmod u+w "$settings"
     fi
   '';
 }

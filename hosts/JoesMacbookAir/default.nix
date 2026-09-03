@@ -54,10 +54,12 @@ in
         "proton-pass"
         "zotero"
         "obsidian"
+        "netnewswire"
         "zoom"
         "signal"
         "tidal"
         "ankerwork"
+        "radix" # free DaisyDisk-style disk space visualizer
       ]
       ++ lib.optionals researchEnabled [
         "r-app" # CRAN binary → R.framework (what RStudio expects)

@@ -24,9 +24,9 @@ let
           - apply
         capabilities:
           - tool_use
-      - name: Llama 3.3 70B (General / agent)
+      - name: Qwen3.8 27B (General / agent)
         provider: ollama
-        model: llama3.3:70b-instruct-q4_K_M
+        model: qwen3.8:27b
         apiBase: http://localhost:11434
         roles:
           - chat

@@ -10,13 +10,15 @@ BLOBS_DIR="$OLLAMA_HOME/models/blobs"
 # Current Continue defaults (M5 Max / 128GB).
 MODELS=(
   "qwen3-coder-next"
-  "llama3.3:70b-instruct-q4_K_M"
+  "qwen3.8:27b"
   "qwen3-coder:30b-a3b-q8_0"
   "qwen2.5-coder:7b-base-q4_K_M"
 )
 
 # Previous defaults / redundant tags — remove if present.
 RETIRED=(
+  "llama3.3:70b-instruct-q4_K_M"
+  "llama3.3:70b"
   "llama3.1:70b-instruct-q4_K_M"
   "llama3.1:70b"
   "qwen2.5-coder:32b-instruct-q8_0"

@@ -41,32 +41,33 @@ in
     brews = [
       "defaultbrowser" # CLI used to set the default browser
     ];
-    casks =
-      [
-        "ghostty"
-        "raycast"
-        "visual-studio-code"
-        "firefox"
-        "google-chrome"
-        "chromium"
-        "proton-drive"
-        "protonvpn"
-        "proton-pass"
-        "zotero"
-        "obsidian"
-        "zoom"
-        "signal"
-        "tidal"
-        "ankerwork"
-      ]
-      ++ lib.optionals researchEnabled [
-        "r-app" # CRAN binary → R.framework (what RStudio expects)
-        "rstudio"
-      ]
-      ++ lib.optionals ollamaEnabled [
-        # Prefer brew cask over curl|sh; ships app + CLI for local models.
-        "ollama-app"
-      ];
+    casks = [
+      "ghostty"
+      "raycast"
+      "visual-studio-code"
+      "firefox"
+      "google-chrome"
+      "chromium"
+      "proton-drive"
+      "protonvpn"
+      "proton-pass"
+      "zotero"
+      "obsidian"
+      "netnewswire"
+      "zoom"
+      "signal"
+      "tidal"
+      "ankerwork"
+      "radix" # free DaisyDisk-style disk space visualizer
+    ]
+    ++ lib.optionals researchEnabled [
+      "r-app" # CRAN binary → R.framework (what RStudio expects)
+      "rstudio"
+    ]
+    ++ lib.optionals ollamaEnabled [
+      # Prefer brew cask over curl|sh; ships app + CLI for local models.
+      "ollama-app"
+    ];
   };
 
   system.defaults.dock = {
@@ -75,26 +76,25 @@ in
     orientation = "bottom"; # change to "left" or "right" later if desired
     show-recents = false;
     # Curated pins only — rebuild replaces the Dock app list.
-    persistent-apps =
-      [
-        "/Applications/Firefox.app"
-        "/System/Applications/Mail.app"
-        "/System/Applications/Calendar.app"
-        "/Applications/Ghostty.app"
-        "/Applications/Visual Studio Code.app"
-        "/Applications/Obsidian.app"
-        "/Applications/Zotero.app"
-      ]
-      ++ lib.optionals researchEnabled [
-        "/Applications/RStudio.app"
-      ]
-      ++ [
-        "/System/Applications/Messages.app"
-        "/Applications/Signal.app"
-        "/Applications/zoom.us.app"
-        "/Applications/TIDAL.app"
-        "/System/Applications/System Settings.app"
-      ];
+    persistent-apps = [
+      "/Applications/Firefox.app"
+      "/System/Applications/Mail.app"
+      "/System/Applications/Calendar.app"
+      "/Applications/Ghostty.app"
+      "/Applications/Visual Studio Code.app"
+      "/Applications/Obsidian.app"
+      "/Applications/Zotero.app"
+    ]
+    ++ lib.optionals researchEnabled [
+      "/Applications/RStudio.app"
+    ]
+    ++ [
+      "/System/Applications/Messages.app"
+      "/Applications/Signal.app"
+      "/Applications/zoom.us.app"
+      "/Applications/TIDAL.app"
+      "/System/Applications/System Settings.app"
+    ];
     persistent-others = [ ];
   };
 

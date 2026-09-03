@@ -99,7 +99,7 @@ Enable Ollama?
   - Adds VS Code Continue extension + ~/.continue/config.yaml
   - Models (pull after rebuild with `ollama-pull-defaults`):
       qwen3-coder-next
-      llama3.3:70b-instruct-q4_K_M
+      qwen3.8:27b
       qwen3-coder:30b-a3b-q8_0
       qwen2.5-coder:7b-base-q4_K_M
   - Tuned for M5 Max / 128GB unified memory.
