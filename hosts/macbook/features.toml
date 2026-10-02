@@ -10,7 +10,7 @@ enabled = true
 #   qwen3-coder:30b-a3b-q8_0
 #   qwen2.5-coder:7b-base-q4_K_M
 
-# TeX Live, R/radian, Quarto, pandoc, just, duckdb/sqlite, RStudio cask + Dock pin.
+# TeX Live, R/radian, Julia, Quarto, pandoc, just, duckdb/sqlite, RStudio cask + Dock pin.
 # Disable on weaker machines to skip the heavy research stack.
 [research]
 enabled = true

@@ -7,6 +7,6 @@
 [ollama]
 enabled = false
 
-# TeX Live, R/radian, Quarto, pandoc, just, duckdb/sqlite, RStudio cask + Dock pin.
+# TeX Live, R/radian, Julia, Quarto, pandoc, just, duckdb/sqlite, RStudio cask + Dock pin.
 [research]
 enabled = true

@@ -157,6 +157,7 @@ From [`home/research.nix`](home/research.nix):
 | `watchexec` | Re-run commands on file change |
 | `sqlite` / `duckdb` | Quick tabular analysis |
 | `R` + `radian` | nixpkgs CLI R + nicer REPL (RStudio uses CRAN `r-app`) |
+| `julia` | nixpkgs Julia (packages via `Pkg` into `~/.julia`) |
 | `quarto` / `pandoc` | Publishing |
 | `texliveFull` | Full TeX Live (`latexmk`, pdflatex, bibtex, …) |
 

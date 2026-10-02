@@ -17,7 +17,7 @@ Features file: $FEATURES
 
 Features:
   ollama     Local LLM runtime + VS Code Continue (large models; needs rebuild)
-  research   TeX Live / R / Quarto / RStudio (heavy; disable on weaker machines)
+  research   TeX Live / R / Julia / Quarto / RStudio (heavy; disable on weaker machines)
 
 Examples:
   $(basename "$0") status

@@ -10,12 +10,13 @@
     sqlite
     duckdb
 
-    # Docs / R / publishing
+    # Docs / R / Julia / publishing
     # Terminal R stays nixpkgs (radian, renv flakes). RStudio uses CRAN via brew cask r-app.
     quarto
     pandoc
     R
     radianWrapper
+    julia
 
     # LaTeX (large first download; full TeX Live for papers/ArXiv)
     texliveFull
