@@ -5,4 +5,5 @@ in
   "secrets/openalex.env.age".publicKeys = [ jbakcoleman ];
   "secrets/tie-verify.env.age".publicKeys = [ jbakcoleman ];
   "secrets/overleaf-git.env.age".publicKeys = [ jbakcoleman ];
+  "secrets/altmetric.env.age".publicKeys = [ jbakcoleman ];
 }

@@ -39,12 +39,14 @@ in
     secrets.openalex-env.file = ../secrets/openalex.env.age;
     secrets.tie-verify-env.file = ../secrets/tie-verify.env.age;
     secrets.overleaf-git-env.file = ../secrets/overleaf-git.env.age;
+    secrets.altmetric-env.file = ../secrets/altmetric.env.age;
   };
 
   home.sessionVariables = {
     OPENALEX_ENV_FILE = config.age.secrets.openalex-env.path;
     TIE_VERIFY_ENV_FILE = config.age.secrets.tie-verify-env.path;
     OVERLEAF_GIT_ENV_FILE = config.age.secrets.overleaf-git-env.path;
+    ALTMETRIC_ENV_FILE = config.age.secrets.altmetric-env.path;
   };
 
   # ''${  => literal ${ for the shell (bash parameter expansion)
@@ -55,6 +57,8 @@ in
     tie-verify-show-path = ''echo "''${TIE_VERIFY_ENV_FILE:-$(getconf DARWIN_USER_TEMP_DIR)/agenix/tie-verify-env}"'';
     overleaf-load = ''source "''${OVERLEAF_GIT_ENV_FILE:-$(getconf DARWIN_USER_TEMP_DIR)/agenix/overleaf-git-env}"'';
     overleaf-show-path = ''echo "''${OVERLEAF_GIT_ENV_FILE:-$(getconf DARWIN_USER_TEMP_DIR)/agenix/overleaf-git-env}"'';
+    altmetric-load = ''source "''${ALTMETRIC_ENV_FILE:-$(getconf DARWIN_USER_TEMP_DIR)/agenix/altmetric-env}"'';
+    altmetric-show-path = ''echo "''${ALTMETRIC_ENV_FILE:-$(getconf DARWIN_USER_TEMP_DIR)/agenix/altmetric-env}"'';
   };
 
   programs.git.settings = {
