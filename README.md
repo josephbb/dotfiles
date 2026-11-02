@@ -123,6 +123,7 @@ Declared in [`hosts/macbook/default.nix`](hosts/macbook/default.nix):
 | Signal, TIDAL | Chat / music |
 | [AnkerWork](https://us.ankerwork.com/) | Webcam / mic accessory software |
 | [Radix](https://tryradix.app) | Free disk space visualizer (DaisyDisk-style) |
+| [LM Studio](https://lmstudio.ai/) | Local LLM GUI |
 | Ollama | Local LLMs — **only if** `[ollama] enabled` |
 
 ### Dock
@@ -361,6 +362,7 @@ Encrypted files in git; decrypted at activation with `~/.ssh/id_ed25519`.
 | [`secrets.nix`](secrets.nix) | Recipients (SSH public keys) |
 | [`secrets/openalex.env.age`](secrets/openalex.env.age) | OpenAlex credentials |
 | [`secrets/overleaf-git.env.age`](secrets/overleaf-git.env.age) | Overleaf Git integration token |
+| [`secrets/cloudflare.env.age`](secrets/cloudflare.env.age) | Cloudflare API token and account ID |
 | [`home/secrets.nix`](home/secrets.nix) | Wire secrets → env / aliases / Overleaf credential helper |
 
 **New / second machine (preferred — rekey):** add the new host’s public key to `secrets.nix` → on an old machine `agenix --rekey` → commit → on the new machine restore private key → `rebuild`.

@@ -40,6 +40,7 @@ in
     secrets.tie-verify-env.file = ../secrets/tie-verify.env.age;
     secrets.overleaf-git-env.file = ../secrets/overleaf-git.env.age;
     secrets.altmetric-env.file = ../secrets/altmetric.env.age;
+    secrets.cloudflare-env.file = ../secrets/cloudflare.env.age;
   };
 
   home.sessionVariables = {
@@ -47,6 +48,7 @@ in
     TIE_VERIFY_ENV_FILE = config.age.secrets.tie-verify-env.path;
     OVERLEAF_GIT_ENV_FILE = config.age.secrets.overleaf-git-env.path;
     ALTMETRIC_ENV_FILE = config.age.secrets.altmetric-env.path;
+    CLOUDFLARE_ENV_FILE = config.age.secrets.cloudflare-env.path;
   };
 
   # ''${  => literal ${ for the shell (bash parameter expansion)
@@ -59,6 +61,8 @@ in
     overleaf-show-path = ''echo "''${OVERLEAF_GIT_ENV_FILE:-$(getconf DARWIN_USER_TEMP_DIR)/agenix/overleaf-git-env}"'';
     altmetric-load = ''source "''${ALTMETRIC_ENV_FILE:-$(getconf DARWIN_USER_TEMP_DIR)/agenix/altmetric-env}"'';
     altmetric-show-path = ''echo "''${ALTMETRIC_ENV_FILE:-$(getconf DARWIN_USER_TEMP_DIR)/agenix/altmetric-env}"'';
+    cloudflare-load = ''source "''${CLOUDFLARE_ENV_FILE:-$(getconf DARWIN_USER_TEMP_DIR)/agenix/cloudflare-env}"'';
+    cloudflare-show-path = ''echo "''${CLOUDFLARE_ENV_FILE:-$(getconf DARWIN_USER_TEMP_DIR)/agenix/cloudflare-env}"'';
   };
 
   programs.git.settings = {

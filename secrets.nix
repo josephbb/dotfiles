@@ -6,4 +6,6 @@ in
   "secrets/tie-verify.env.age".publicKeys = [ jbakcoleman ];
   "secrets/overleaf-git.env.age".publicKeys = [ jbakcoleman ];
   "secrets/altmetric.env.age".publicKeys = [ jbakcoleman ];
+  "secrets/internet-archive.env.age".publicKeys = [ jbakcoleman ];
+  "secrets/cloudflare.env.age".publicKeys = [ jbakcoleman ];
 }

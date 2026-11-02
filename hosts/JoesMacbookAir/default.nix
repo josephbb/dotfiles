@@ -60,6 +60,7 @@ in
         "tidal"
         "ankerwork"
         "radix" # free DaisyDisk-style disk space visualizer
+        "lm-studio" # local LLM GUI
       ]
       ++ lib.optionals researchEnabled [
         "r-app" # CRAN binary → R.framework (what RStudio expects)
