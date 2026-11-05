@@ -14,6 +14,7 @@
     ./vscode.nix
     ./zotero.nix
     ./ollama.nix
+    ./opencode.nix
   ]
   ++ lib.optionals (features.research.enabled or true) [
     ./research.nix

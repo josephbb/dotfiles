@@ -23,12 +23,14 @@ Declarative macOS setup for Joe’s machine via **[nix-darwin](https://github.co
   - [Docker / Colima](#docker--colima)
   - [Project templates](#project-templates)
   - [R / Quarto / LaTeX](#r--quarto--latex)
+  - [OpenCode](#opencode)
   - [Secrets (OpenAlex)](#secrets-openalex)
 - [Data directories](#data-directories)
 - [Secrets (agenix)](#secrets-agenix)
 - [Zotero](#zotero)
 - [Projects & templates](#projects--templates)
 - [Optional: Ollama + Continue](#optional-ollama--continue)
+- [OpenCode + nono](#opencode--nono)
 - [Fresh Mac](#fresh-mac)
 - [Raycast](#raycast)
 
@@ -81,7 +83,7 @@ home/                     # home-manager modules (shared; gated by features)
   secrets.nix             # agenix wiring
   shell.nix               # zsh, starship, fzf, zoxide, tmux, Ghostty
   git.nix                 # git + gh + delta
-  vscode.nix / firefox.nix / zotero.nix / ollama.nix
+  vscode.nix / firefox.nix / zotero.nix / ollama.nix / opencode.nix
   editor-settings.nix     # VS Code userSettings
 secrets/                  # encrypted .age files
 secrets.nix               # agenix recipients (SSH public keys)
@@ -146,6 +148,7 @@ From [`home/packages.nix`](home/packages.nix) + [`home/shell.nix`](home/shell.ni
 | Python tooling | `uv`, `direnv`, `nix-direnv` |
 | Nix | `nixfmt`, `nil` |
 | Cloud | `aws` (AWS CLI v2 via official installer on `rebuild`) |
+| Agents | `opencode`, `nono` (OpenCode runs inside nono; [`home/opencode.nix`](home/opencode.nix)) |
 | Misc | `curl`, `wget`, `tldr`, `shellcheck`, `sl`, `agenix` |
 
 ### Research stack
@@ -195,7 +198,7 @@ Nix seeds `settings.json` on first setup, then leaves it user-owned so VS Code S
 
 ### Aliases
 
-Declared in [`home/shell.nix`](home/shell.nix) (plus Zotero / secrets / Ollama modules):
+Declared in [`home/shell.nix`](home/shell.nix) (plus Zotero / secrets / Ollama / OpenCode modules):
 
 | Alias | What it does |
 |---|---|
@@ -209,6 +212,8 @@ Declared in [`home/shell.nix`](home/shell.nix) (plus Zotero / secrets / Ollama m
 | `openalex-load` / `openalex-show-path` | Load / show OpenAlex env file |
 | `overleaf-load` / `overleaf-show-path` | Load / show Overleaf Git token env |
 | `ollama-setup` / `status` / `pull-defaults` / `prune` | Local LLM helpers (when enabled) |
+| `opencode-setup` | Pull the nono OpenCode pack ([`scripts/opencode-setup.sh`](scripts/opencode-setup.sh)) |
+| `opencode-load` / `opencode-show-path` | Load / show OpenCode provider env |
 
 Oh My Zsh also adds many short git aliases (`gst`, `gco`, `gd`, …). List with: `alias | rg '^g'`.
 
@@ -310,6 +315,28 @@ nix flake new -t ~/dotfiles#latex    ~/Projects/academic-job-2026
 
 Bib: LaTeX Workshop reads `~/References/` ([Zotero](#zotero)).
 
+### OpenCode
+
+`opencode` is a zsh function: the nix binary inside nono. Setup notes: [OpenCode + nono](#opencode--nono).
+
+| Command | Notes |
+|---|---|
+| `opencode` | Sandboxed session in the current directory |
+| `opencode-setup` | Once after `rebuild`: pull the `nolabs-ai/opencode` pack |
+| `command opencode auth` | ChatGPT / Copilot login, outside the sandbox |
+| `agenix -e secrets/opencode.env.age` | Set `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GEMINI_API_KEY` |
+| `opencode-load` | Source those keys into this shell (the function already loads them for one run) |
+
+VS Code uses the same function. The integrated terminal is zsh, so `Cmd-Esc` runs the sandboxed `opencode`. Extension id: `sst-dev.opencode` (Marketplace; not in the Home Manager extension list).
+
+| Keys | Action |
+|---|---|
+| `Cmd-Esc` | Open or focus OpenCode in a split terminal |
+| `Cmd-Shift-Esc` | New session |
+| `Cmd-Option-K` | Insert a file reference, e.g. `@File#L37-42` |
+
+Install the extension from the Marketplace, or run `opencode` once in VS Code’s terminal.
+
 ### Secrets (OpenAlex)
 
 ```bash
@@ -363,6 +390,7 @@ Encrypted files in git; decrypted at activation with `~/.ssh/id_ed25519`.
 | [`secrets/openalex.env.age`](secrets/openalex.env.age) | OpenAlex credentials |
 | [`secrets/overleaf-git.env.age`](secrets/overleaf-git.env.age) | Overleaf Git integration token |
 | [`secrets/cloudflare.env.age`](secrets/cloudflare.env.age) | Cloudflare API token and account ID |
+| [`secrets/opencode.env.age`](secrets/opencode.env.age) | OpenCode provider API keys |
 | [`home/secrets.nix`](home/secrets.nix) | Wire secrets → env / aliases / Overleaf credential helper |
 
 **New / second machine (preferred — rekey):** add the new host’s public key to `secrets.nix` → on an old machine `agenix --rekey` → commit → on the new machine restore private key → `rebuild`.
@@ -418,6 +446,23 @@ ollama-setup                 # start, pull defaults, prune retired
 Tuned for **M5 Max / 128GB**. Continue v2 reads [`~/.continue/config.yaml`](home/ollama.nix) (not the old `config.json`). `rebuild` does **not** pull models; use `ollama-setup`. Disable: `feature-disable ollama` → `rebuild` (models left on disk).
 
 If Continue’s Models UI shows empty Chat/Autocomplete/Edit slots, reload the VS Code window after `rebuild` so it picks up the managed `config.yaml`.
+
+---
+
+## OpenCode + nono
+
+Wiring: [`home/opencode.nix`](home/opencode.nix). `rebuild` installs both `opencode` and `nono` from nixpkgs. Typing `opencode` runs `nono run --profile opencode-local`, which extends the registry pack `nolabs-ai/opencode`.
+
+```bash
+rebuild
+opencode-setup          # once: nono pull nolabs-ai/opencode
+agenix -e secrets/opencode.env.age
+# OPENAI_API_KEY=...  ANTHROPIC_API_KEY=...  GEMINI_API_KEY=...
+rebuild
+opencode
+```
+
+The wrapper sources `secrets/opencode.env.age` for that process only. `opencode-load` still sources it into the current shell, same as the other secrets. ChatGPT and Copilot login stays `command opencode auth` (unsandboxed binary). This pin is OpenCode 1, so the wrapper does not pass `--standalone`.
 
 ---
 

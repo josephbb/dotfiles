@@ -41,6 +41,7 @@ in
     secrets.overleaf-git-env.file = ../secrets/overleaf-git.env.age;
     secrets.altmetric-env.file = ../secrets/altmetric.env.age;
     secrets.cloudflare-env.file = ../secrets/cloudflare.env.age;
+    secrets.opencode-env.file = ../secrets/opencode.env.age;
   };
 
   home.sessionVariables = {
@@ -49,6 +50,7 @@ in
     OVERLEAF_GIT_ENV_FILE = config.age.secrets.overleaf-git-env.path;
     ALTMETRIC_ENV_FILE = config.age.secrets.altmetric-env.path;
     CLOUDFLARE_ENV_FILE = config.age.secrets.cloudflare-env.path;
+    OPENCODE_ENV_FILE = config.age.secrets.opencode-env.path;
   };
 
   # ''${  => literal ${ for the shell (bash parameter expansion)
@@ -63,6 +65,8 @@ in
     altmetric-show-path = ''echo "''${ALTMETRIC_ENV_FILE:-$(getconf DARWIN_USER_TEMP_DIR)/agenix/altmetric-env}"'';
     cloudflare-load = ''source "''${CLOUDFLARE_ENV_FILE:-$(getconf DARWIN_USER_TEMP_DIR)/agenix/cloudflare-env}"'';
     cloudflare-show-path = ''echo "''${CLOUDFLARE_ENV_FILE:-$(getconf DARWIN_USER_TEMP_DIR)/agenix/cloudflare-env}"'';
+    opencode-load = ''source "''${OPENCODE_ENV_FILE:-$(getconf DARWIN_USER_TEMP_DIR)/agenix/opencode-env}"'';
+    opencode-show-path = ''echo "''${OPENCODE_ENV_FILE:-$(getconf DARWIN_USER_TEMP_DIR)/agenix/opencode-env}"'';
   };
 
   programs.git.settings = {
