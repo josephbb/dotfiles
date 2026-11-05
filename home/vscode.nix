@@ -19,9 +19,10 @@ in
     package = pkgs.vscode;
 
     profiles.default = {
-      enableExtensionUpdateCheck = false;
-      enableUpdateCheck = false;
-
+      # Leave the update-check options unset. Setting them makes Home Manager
+      # own settings.json, which collides with the user-owned file and the
+      # existing settings.json.backup. The live file already has
+      # "update.mode": "none" and "extensions.autoCheckUpdates": false.
       extensions = with pkgs.vscode-extensions; [
         # Python
         ms-python.python
