@@ -9,4 +9,5 @@ in
   "secrets/internet-archive.env.age".publicKeys = [ jbakcoleman ];
   "secrets/cloudflare.env.age".publicKeys = [ jbakcoleman ];
   "secrets/opencode.env.age".publicKeys = [ jbakcoleman ];
+  "secrets/dimensions.env.age".publicKeys = [ jbakcoleman ];
 }

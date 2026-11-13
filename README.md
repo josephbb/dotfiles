@@ -391,6 +391,8 @@ Encrypted files in git; decrypted at activation with `~/.ssh/id_ed25519`.
 | [`secrets/overleaf-git.env.age`](secrets/overleaf-git.env.age) | Overleaf Git integration token |
 | [`secrets/cloudflare.env.age`](secrets/cloudflare.env.age) | Cloudflare API token and account ID |
 | [`secrets/opencode.env.age`](secrets/opencode.env.age) | OpenCode provider API keys |
+| [`secrets/internet-archive.env.age`](secrets/internet-archive.env.age) | Internet Archive S3 keys (`IA_ACCESS_KEY_ID`, `IA_SECRET_ACCESS_KEY`); `internet-archive-load` |
+| [`secrets/dimensions.env.age`](secrets/dimensions.env.age) | Dimensions API key (`DIMENSIONS_API_KEY`); `dimensions-load` |
 | [`home/secrets.nix`](home/secrets.nix) | Wire secrets → env / aliases / Overleaf credential helper |
 
 **New / second machine (preferred — rekey):** add the new host’s public key to `secrets.nix` → on an old machine `agenix --rekey` → commit → on the new machine restore private key → `rebuild`.
